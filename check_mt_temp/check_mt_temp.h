@@ -10,7 +10,7 @@
 #define MODE_HW 2
 #define MODE_BOTH 3
 
-typedef u_char temp_t;
+typedef u_int8_t temp_t;
 typedef char msg_t[40];
 typedef char perf_t[50];
 
@@ -23,7 +23,6 @@ code_t check_temp(const temp_t temp,
                   const char *perf_str,
                   msg_t *msg,
                   perf_t *perf);
-void fix_threshold(temp_t *warn, temp_t *crit);
 
 #endif /* CHECK_MT_TEMP_H */
 

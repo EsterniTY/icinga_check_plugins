@@ -68,12 +68,3 @@ code_t check_temp(const temp_t temp,
 
     return code;
 }
-
-void fix_threshold(temp_t *warn, temp_t *crit)
-{
-    if ((*warn != 0 && *crit != 0) && *warn > *crit) {
-        temp_t tmp = *warn;
-        *warn = *crit;
-        *crit = tmp;
-    }
-}
