@@ -47,3 +47,12 @@ size_t format_perfdata(char *perfdata,
 
     return size;
 }
+
+void fix_threshold(u_int8_t *warn, u_int8_t *crit)
+{
+    if ((*warn != 0 && *crit != 0) && *warn > *crit) {
+        u_int8_t tmp = *warn;
+        *warn = *crit;
+        *crit = tmp;
+    }
+}

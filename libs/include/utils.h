@@ -3,7 +3,7 @@
 
 #include <sys/types.h>
 
-typedef u_char code_t;
+typedef u_int8_t code_t;
 
 #define EXIT_OK 0
 #define EXIT_WARNING 1
@@ -18,5 +18,6 @@ size_t format_perfdata(char *perfdata,
                        const u_int val,
                        const u_int warn,
                        const u_int crit);
+void fix_threshold(u_int8_t *warn, u_int8_t *crit);
 
 #endif /* UTILS_H */
