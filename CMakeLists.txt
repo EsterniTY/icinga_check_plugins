@@ -8,3 +8,4 @@ set(CMAKE_C_FLAGS_MINSIZEREL "-Os -s")
 
 add_subdirectory(libs)
 add_subdirectory(check_mt_temp)
+add_subdirectory(check_mt_cpu)
