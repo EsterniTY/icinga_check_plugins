@@ -5,8 +5,8 @@
 
 #include "check_mt_temp.h"
 
-static const char *oid_hw_temp = ".1.3.6.1.4.1.14988.1.1.3.10.0";
-static const char *oid_cpu_temp = ".1.3.6.1.4.1.14988.1.1.3.11.0";
+static const oid oid_hw_temp[] = { 1, 3, 6, 1, 4, 1, 14988, 1, 1, 3, 10, 0 };
+static const oid oid_cpu_temp[] = { 1, 3, 6, 1, 4, 1, 14988, 1, 1, 3, 11, 0 };
 static u_int mode = MODE_BOTH;
 
 int main(int argc, char *argv[])
@@ -71,10 +71,12 @@ int main(int argc, char *argv[])
     init_session(host, community);
 
     if ((mode & MODE_CPU) == MODE_CPU)
-        cpu_temp = get_hw_temperature(oid_cpu_temp);
+        cpu_temp = get_hw_temperature(oid_cpu_temp,
+                                      sizeof(oid_cpu_temp) / sizeof (oid));
 
     if ((mode & MODE_HW) == MODE_HW)
-        hw_temp = get_hw_temperature(oid_hw_temp);
+        hw_temp = get_hw_temperature(oid_hw_temp,
+                                     sizeof(oid_hw_temp) / sizeof (oid));
 
     close_session();
 

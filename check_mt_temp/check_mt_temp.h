@@ -2,6 +2,8 @@
 #define CHECK_MT_TEMP_H
 
 #include <sys/types.h>
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
 
 #include "utils.h"
 
@@ -14,7 +16,7 @@ typedef u_int8_t temp_t;
 typedef char msg_t[40];
 typedef char perf_t[50];
 
-temp_t get_hw_temperature(const char *oid);
+temp_t get_hw_temperature(const oid *oid, const size_t oid_length);
 void print_help(void);
 code_t check_temp(const temp_t temp,
                   const temp_t warn,

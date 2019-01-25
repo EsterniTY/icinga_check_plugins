@@ -7,13 +7,13 @@
 extern const char *__progname;
 static const char *__version = "1.0";
 
-temp_t get_hw_temperature(const char *oid)
+temp_t get_hw_temperature(const oid *oid, size_t oid_length)
 {
     struct snmp_pdu *response;
     struct variable_list *vars;
     temp_t temp = 0;
 
-    get_pdu(oid, &response);
+    get_pdu(oid, oid_length, &response);
 
     vars = response->variables;
 

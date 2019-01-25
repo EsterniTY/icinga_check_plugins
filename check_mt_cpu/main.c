@@ -8,7 +8,7 @@
 typedef char msg_t[40];
 typedef char perf_t[50];
 
-static const char *oid_cpu_load = ".1.3.6.1.4.1.2021.11.10.0";
+static const oid oid_cpu_load[] = { 1, 3, 6, 1, 4, 1, 2021, 11, 10, 0 };
 
 int main(int argc, char *argv[])
 {
@@ -52,7 +52,8 @@ int main(int argc, char *argv[])
         community = "public";
 
     init_session(host, community);
-    load = get_cpu_load(oid_cpu_load);
+    load = get_cpu_load(oid_cpu_load,
+                        sizeof(oid_cpu_load) / sizeof (oid));
     close_session();
 
     fix_threshold(&warn, &crit);

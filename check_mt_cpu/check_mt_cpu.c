@@ -21,13 +21,13 @@ void print_help(void)
     puts("\t-c    Optional critical threshold");
 }
 
-load_t get_cpu_load(const char *oid)
+load_t get_cpu_load(const oid *oid, const size_t oid_length)
 {
     struct snmp_pdu *response;
     struct variable_list *vars;
     load_t temp = 0;
 
-    get_pdu(oid, &response);
+    get_pdu(oid, oid_length, &response);
 
     vars = response->variables;
 
