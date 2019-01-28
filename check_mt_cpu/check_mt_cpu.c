@@ -8,6 +8,39 @@
 extern const char *__progname;
 static const char *__version = "1.0";
 
+void parse_args(int argc, char *argv[])
+{
+    int opt;
+
+    while ((opt = getopt(argc, argv, "H:C:w:c:h")) != -1)
+    {
+        switch (opt)
+        {
+        case 'H':
+            options.host = optarg;
+            break;
+        case 'C':
+            options.community = optarg;
+            break;
+        case 'w':
+            options.warn = (load_t)atoi(optarg);
+            break;
+        case 'c':
+            options.crit = (load_t)atoi(optarg);
+            break;
+        case 'h':
+            print_help();
+            exit(0);
+        }
+    }
+
+    if (options.host == NULL)
+        exit_error(EXIT_CRITICAL, "No host defined");
+
+    if (options.community == NULL)
+        options.community = "public";
+}
+
 void print_help(void)
 {
     printf("Check RouterOS CPU load. ");
