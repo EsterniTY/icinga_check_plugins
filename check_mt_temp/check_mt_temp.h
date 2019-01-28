@@ -16,7 +16,18 @@ typedef u_int8_t temp_t;
 typedef char msg_t[40];
 typedef char perf_t[50];
 
-temp_t get_hw_temperature(const oid *oid, const size_t oid_length);
+extern struct opt_s {
+    char *host;
+    char *community;
+    u_int mode;
+    temp_t hw_warn;
+    temp_t hw_crit;
+    temp_t cpu_warn;
+    temp_t cpu_crit;
+} options;
+
+temp_t get_temp(const oid *oid, const size_t oid_length);
+void parse_args(int argc, char *argv[]);
 void print_help(void);
 code_t check_temp(const temp_t temp,
                   const temp_t warn,

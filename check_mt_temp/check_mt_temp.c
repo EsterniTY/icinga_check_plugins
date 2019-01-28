@@ -7,7 +7,7 @@
 extern const char *__progname;
 static const char *__version = "1.0";
 
-temp_t get_hw_temperature(const oid *oid, size_t oid_length)
+temp_t get_temp(const oid *oid, size_t oid_length)
 {
     struct snmp_pdu *response;
     struct variable_list *vars;
@@ -23,6 +23,60 @@ temp_t get_hw_temperature(const oid *oid, size_t oid_length)
     snmp_free_pdu(response);
 
     return temp;
+}
+
+void parse_args(int argc, char *argv[])
+{
+    int opt;
+
+    options.mode = MODE_BOTH;
+
+    while ((opt = getopt(argc, argv, "H:C:w:c:x:y:m:h")) != -1)
+    {
+        switch (opt)
+        {
+        case 'H':
+            options.host = optarg;
+            break;
+        case 'C':
+            options.community = optarg;
+            break;
+        case 'w':
+            options.hw_warn = (temp_t)atoi(optarg);
+            break;
+        case 'c':
+            options.hw_crit = (temp_t)atoi(optarg);
+            break;
+        case 'x':
+            options.cpu_warn = (temp_t)atoi(optarg);
+            break;
+        case 'y':
+            options.cpu_crit = (temp_t)atoi(optarg);
+            break;
+        case 'm':
+            if (strcmp(optarg, "cpu") == 0)
+                options.mode = MODE_CPU;
+            else if (strcmp(optarg, "hw") == 0)
+                options.mode = MODE_HW;
+            else if (strcmp(optarg, "ok") == 0)
+                options.mode = MODE_OK;
+            else
+                options.mode = MODE_BOTH;
+            break;
+        case 'h':
+            print_help();
+            exit(0);
+        }
+    }
+
+    if (options.host == NULL)
+        exit_error(EXIT_CRITICAL, "No host defined");
+
+    if (options.mode == MODE_OK)
+        exit_error(EXIT_OK, "OK mode selected. No checks performed");
+
+    if (options.community == NULL)
+        options.community = "public";
 }
 
 void print_help(void)
