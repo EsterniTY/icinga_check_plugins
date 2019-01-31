@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 
     parse_args(argc, argv);
 
-    init_session(options.host, options.community);
+    init_session(options.host, options.community, SNMP_VERSION_2c);
 
     if ((options.mode & MODE_CPU) == MODE_CPU)
         cpu_temp = get_temp(oid_cpu_temp,

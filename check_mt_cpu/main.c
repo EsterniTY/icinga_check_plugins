@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 
     parse_args(argc, argv);
 
-    init_session(options.host, options.community);
+    init_session(options.host, options.community, SNMP_VERSION_2c);
     load = get_cpu_load(oid_cpu_load,
                         sizeof(oid_cpu_load) / sizeof (oid));
     close_session();

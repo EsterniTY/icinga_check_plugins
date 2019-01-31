@@ -8,14 +8,14 @@
 
 static struct snmp_session *ss;
 
-void init_session(char *host, char *community)
+void init_session(char *host, char *community, long version)
 {
     struct snmp_session session;
     char *error;
 
     snmp_sess_init(&session);
     session.peername = host;
-    session.version = SNMP_VERSION_2c;
+    session.version = version;
     session.community = (u_char *) community;
     session.community_len = strlen(community);
 
@@ -62,12 +62,6 @@ int _get_pdu(int type,
         exit_error(EXIT_CRITICAL, "Unable to connect to host");
     }
 
-    if ((*response)->errstat != SNMP_ERR_NOERROR) {
-        close_session();
-        snmp_free_pdu(*response);
-        exit_error(EXIT_CRITICAL, "Error communicating to host");
-    }
-
     return status;
 }
 
@@ -92,4 +86,14 @@ int get_pdu_bulk(const oid *coid,
 {
     return _get_pdu(SNMP_MSG_GETBULK,
                     coid, coid_length, response, max_repetitions);
+}
+
+
+void check_response_errstat(struct snmp_pdu **response)
+{
+    if ((*response)->errstat != SNMP_ERR_NOERROR) {
+        close_session();
+        snmp_free_pdu(*response);
+        exit_error(EXIT_CRITICAL, "Error communicating to host");
+    }
 }

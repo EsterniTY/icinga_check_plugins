@@ -14,6 +14,7 @@ temp_t get_temp(const oid *oid, size_t oid_length)
     temp_t temp = 0;
 
     get_pdu(oid, oid_length, &response);
+    check_response_errstat(&response);
 
     vars = response->variables;
 
