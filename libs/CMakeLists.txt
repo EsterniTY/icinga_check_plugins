@@ -3,6 +3,7 @@ project(libs)
 add_library(${PROJECT_NAME}
     src/utils.c
     src/snmp.c
+    src/perfdata.c
 )
 
 add_library(sub::libs ALIAS ${PROJECT_NAME})
