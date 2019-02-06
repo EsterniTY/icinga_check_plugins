@@ -4,6 +4,7 @@
 #include <sys/types.h>
 
 typedef u_int8_t code_t;
+typedef unsigned long long mtime_t;
 
 #define EXIT_OK 0
 #define EXIT_WARNING 1
@@ -12,6 +13,7 @@ typedef u_int8_t code_t;
 
 int exit_ok(const code_t code, const char *msg, const char *perfdata);
 int exit_error(const code_t code, const char *message);
+mtime_t microtime(void);
 
 size_t format_perfdata(char *perfdata,
                        const char *label,

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/time.h>
 
 #include "utils.h"
 
@@ -15,10 +16,7 @@ int exit_ok(const code_t code, const char *msg, const char *perfdata)
 
 int exit_error(const code_t code, const char *message)
 {
-    if (code == EXIT_OK)
-        printf("OK: %s\n", message);
-    else
-        printf("CRITICAL: %s\n", message);
+    printf("%s: %s\n", messages[code], message);
 
     exit(code);
 }
@@ -55,4 +53,14 @@ void fix_threshold(u_int8_t *warn, u_int8_t *crit)
         *warn = *crit;
         *crit = tmp;
     }
+}
+
+mtime_t microtime()
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    mtime_t microtime = (mtime_t)(tv.tv_sec) * 1000 +
+            (mtime_t)(tv.tv_usec) / 1000;
+
+    return microtime;
 }
