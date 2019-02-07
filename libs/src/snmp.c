@@ -8,6 +8,7 @@
 
 static struct snmp_session *ss;
 static u_int8_t _response_errstat_exit = ERRSTAT_EXIT;
+static long _errstat = SNMP_ERR_NOERROR;
 
 void init_session(char *host, char *community, long version)
 {
@@ -94,16 +95,31 @@ void set_response_errstat_exit(u_int8_t status)
     _response_errstat_exit = status;
 }
 
-long check_response_errstat(struct snmp_pdu *response)
+void check_response_errstat(struct snmp_pdu *response)
 {
+    _errstat = response->errstat;
+
     if (response->errstat != SNMP_ERR_NOERROR) {
         snmp_free_pdu(response);
 
         if (_response_errstat_exit == ERRSTAT_EXIT) {
+            char *msg;
+            switch (_errstat) {
+            case SNMP_ERR_NOSUCHNAME:
+                msg = "No such name";
+                break;
+            default:
+                msg = "Error communicating to host";
+                break;
+            }
+
             close_session();
-            exit_error(EXIT_CRITICAL, "Error communicating to host");
+            exit_error(EXIT_CRITICAL, msg);
         }
     }
+}
 
-    return response->errstat;
+long errstat()
+{
+    return _errstat;
 }
