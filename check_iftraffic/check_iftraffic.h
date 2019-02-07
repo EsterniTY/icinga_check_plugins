@@ -7,6 +7,8 @@
 
 #include "if_status.h"
 
+#define OVECCOUNT 30
+
 extern struct opt_s {
     char *host;
     char *community;
