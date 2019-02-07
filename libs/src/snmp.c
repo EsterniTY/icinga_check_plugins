@@ -120,7 +120,6 @@ void check_response_errstat(struct snmp_pdu *response)
     _errstat = response->errstat;
 
     if (response->errstat != SNMP_ERR_NOERROR) {
-        long errstat = response->errstat;
         snmp_free_pdu(response);
 
         if (_response_errstat_exit == ERRSTAT_EXIT) {
