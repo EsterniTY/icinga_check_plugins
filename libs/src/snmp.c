@@ -117,11 +117,22 @@ void set_response_errstat_exit(u_int8_t status)
 long check_response_errstat(struct snmp_pdu *response)
 {
     if (response->errstat != SNMP_ERR_NOERROR) {
+        long errstat = response->errstat;
         snmp_free_pdu(response);
 
         if (_response_errstat_exit == ERRSTAT_EXIT) {
+            char *msg;
+            switch (errstat) {
+            case SNMP_ERR_NOSUCHNAME:
+                msg = "No such name";
+                break;
+            default:
+                msg = "Error communicating to host";
+                break;
+            }
+
             close_session();
-            exit_error(EXIT_CRITICAL, "Error communicating to host");
+            exit_error(EXIT_CRITICAL, msg);
         }
     }
 
