@@ -15,10 +15,13 @@
 #include "check_iftraffic.h"
 
 struct opt_s options;
+struct host_settings_s host_settings;
 
 int main(int argc, char *argv[])
 {
     parse_args(argc, argv);
+
+    host_settings.has_ifSpeed64 = 1;
 
 #ifdef DEBUG
     setlocale(LC_NUMERIC, "");
