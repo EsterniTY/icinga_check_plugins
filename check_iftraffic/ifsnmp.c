@@ -86,8 +86,11 @@ char *ifEntryAlias(const oid coid)
 
     if (response->variables->type == ASN_OCTET_STR) {
         size_t len = response->variables->val_len;
-        value = realloc(value, len * sizeof(char));
-        memcpy(value, response->variables->val.string, len);
+
+        if (len > 0) {
+            value = realloc(value, len * sizeof(char));
+            memcpy(value, response->variables->val.string, len);
+        }
     }
 
     snmp_free_pdu(response);

@@ -99,6 +99,64 @@ void print_help()
     puts("\t-0    Show interfaces in DOWN state");
 }
 
+void _work_on_pdu(struct variable_list **_vars,
+                  struct if_status_t **curr,
+                  struct if_status_t **info)
+{
+    struct variable_list *vars = *_vars;
+
+    oid theOid = vars->name[vars->name_length-1];
+
+    char *alias;
+    char *v_name;
+    size_t v_name_len = 0;
+    size_t alias_len = 0;
+
+    if ((alias = ifEntryAlias(theOid)) != NULL)
+         alias_len = strlen(alias);
+
+    if (alias_len == 0 || strcmp((char *)vars->val.string, alias) == 0) {
+        v_name_len = vars->val_len;
+        v_name = malloc(v_name_len * sizeof(char) + 1);
+
+        memcpy(v_name, vars->val.string, vars->val_len);
+        v_name[v_name_len] = '\0';
+    }
+    else {
+
+        v_name_len = vars->val_len + alias_len + 3;
+        v_name = malloc(v_name_len * sizeof(char) + 1);
+
+        memcpy(v_name, vars->val.string, vars->val_len);
+        strcat(&v_name[vars->val_len], " (");
+        v_name[vars->val_len] = ' ';
+        v_name[vars->val_len + 1] = '(';
+        memcpy(&v_name[vars->val_len + 2], alias, alias_len);
+        v_name[v_name_len - 1] = ')';
+        v_name[v_name_len] = '\0';
+    }
+
+    char *new_name = NULL;
+    size_t new_name_len = 0;
+
+    if (options.filter) {
+        new_name_len = str_format(&new_name, v_name,
+                                  options.filter,
+                                  options.pattern);
+        v_name_len = new_name_len;
+    }
+
+    if (!options.filter || new_name_len > 0) {
+        fill_info(curr, vars, v_name, v_name_len);
+
+        if (!*info)
+            *info = *curr;
+    }
+
+    free(v_name);
+    free(alias);
+}
+
 struct if_status_t *load_snmp_info(void)
 {
     struct snmp_pdu *response;
@@ -140,53 +198,7 @@ struct if_status_t *load_snmp_info(void)
                 continue;
             }
 
-            oid theOid = vars->name[vars->name_length-1];
-
-            char *v_name;
-            size_t v_name_len = 0;
-
-            char *alias = ifEntryAlias(theOid);
-            size_t alias_len = strlen(alias);
-
-            if (strcmp((char *)vars->val.string, alias) == 0) {
-                v_name_len = vars->val_len;
-                v_name = malloc(v_name_len * sizeof(char) + 1);
-
-                memcpy(v_name, vars->val.string, vars->val_len);
-                v_name[v_name_len] = '\0';
-            }
-            else {
-                v_name_len = vars->val_len + alias_len + 3;
-                v_name = malloc(v_name_len * sizeof(char) + 1);
-
-                memcpy(v_name, vars->val.string, vars->val_len);
-                strcat(&v_name[vars->val_len], " (");
-                v_name[vars->val_len] = ' ';
-                v_name[vars->val_len + 1] = '(';
-                memcpy(&v_name[vars->val_len + 2], alias, alias_len);
-                v_name[v_name_len - 1] = ')';
-                v_name[v_name_len] = '\0';
-            }
-
-            char *new_name = NULL;
-            size_t new_name_len = 0;
-
-            if (options.filter) {
-                new_name_len = str_format(&new_name, v_name,
-                                          options.filter,
-                                          options.pattern);
-                v_name_len = new_name_len;
-            }
-
-            if (!options.filter || new_name_len > 0) {
-                fill_info(&curr, vars, v_name, v_name_len);
-
-                if (!info)
-                    info = curr;
-            }
-
-            free(v_name);
-            free(alias);
+            _work_on_pdu(&vars, &curr, &info);
 
             memmove((char *)name, (char *)vars->name,
                     vars->name_length * sizeof(oid));
