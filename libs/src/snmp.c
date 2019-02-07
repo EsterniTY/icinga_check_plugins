@@ -73,21 +73,6 @@ int _get_pdu(int type,
     struct snmp_pdu *pdu;
     int status;
 
-#ifdef DEBUG
-    _pdu_request_counter++;
-
-    char *str = calloc(4096, sizeof(char));
-    char p[10];
-    size_t len = 0;
-    for (int i = 0; i < (int)coid_length; i++) {
-        snprintf(p, 10, ".%lu", coid[i]);
-        len += strlen(p);
-        strcat(str, p);
-    }
-    str[len] = '\0';
-    printf("_get_pdu #%lu: %s\n", _pdu_request_counter, str);
-#endif
-
     pdu = snmp_pdu_create(type);
 
     if (type == SNMP_MSG_GETBULK) {
@@ -167,10 +152,3 @@ long errstat()
 {
     return _errstat;
 }
-
-#ifdef DEBUG
-size_t _get_pdu_requests(void)
-{
-    return _pdu_request_counter;
-}
-#endif
