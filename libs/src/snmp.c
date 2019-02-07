@@ -89,11 +89,11 @@ int get_pdu_bulk(const oid *coid,
 }
 
 
-void check_response_errstat(struct snmp_pdu **response)
+void check_response_errstat(struct snmp_pdu *response)
 {
-    if ((*response)->errstat != SNMP_ERR_NOERROR) {
+    if (response->errstat != SNMP_ERR_NOERROR) {
         close_session();
-        snmp_free_pdu(*response);
+        snmp_free_pdu(response);
         exit_error(EXIT_CRITICAL, "Error communicating to host");
     }
 }

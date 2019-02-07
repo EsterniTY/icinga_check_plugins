@@ -23,6 +23,6 @@ int get_pdu_bulk(const oid *coid,
                  struct snmp_pdu **response,
                  int max_repetitions);
 
-void check_response_errstat(struct snmp_pdu **response);
+void check_response_errstat(struct snmp_pdu *response);
 
 #endif /* CHECK_LIBS_SNMP_H */
