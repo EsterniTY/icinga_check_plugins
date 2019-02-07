@@ -2,9 +2,11 @@
 #include "ifsnmp.h"
 
 #include "info.h"
+#include "snmp.h"
 #include "check_iftraffic.h"
 
 struct opt_s options;
+struct host_settings_s host_settings;
 
 void free_info(struct if_status_t *cell)
 {
@@ -80,7 +82,16 @@ void fill_info(struct if_status_t **curr, const struct variable_list *vars,
         outOctets = ifEntry32(oid_ifOutOctets32, curr_oid);
     } else {
         inOctets = ifEntry64(oid_ifInOctets64, curr_oid);
+        if (errstat() != SNMP_ERR_NOERROR) {
+            host_settings.has_ifSpeed64 = 0;
+            inOctets = ifEntry32(oid_ifInOctets32, curr_oid);
+        }
+
         outOctets = ifEntry64(oid_ifOutOctets64, curr_oid);
+        if (errstat() != SNMP_ERR_NOERROR) {
+            host_settings.has_ifSpeed64 = 0;
+            outOctets = ifEntry32(oid_ifOutOctets32, curr_oid);
+        }
     }
 
     add_info(curr, curr_oid,

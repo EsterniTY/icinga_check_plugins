@@ -11,7 +11,13 @@ u_int64_t ifEntry64(const oid coid1, const oid coid2)
     int status = 0;
 
     status = get_pdu(theOid, OID_LENGTH(theOid), &response);
+
+    set_response_errstat_exit(ERRSTAT_RETURN);
     check_response_errstat(response);
+    set_response_errstat_exit(ERRSTAT_EXIT);
+
+    if (errstat() != SNMP_ERR_NOERROR)
+        return 0;
 
     switch (response->variables->type) {
     case ASN_GAUGE:
