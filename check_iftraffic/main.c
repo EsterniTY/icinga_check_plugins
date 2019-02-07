@@ -30,11 +30,12 @@ int main(int argc, char *argv[])
     struct if_status_t *old_info = NULL;
     struct if_status_t *new_info = NULL;
 
+    old_info = read_info();
+
     init_session(options.host, options.community, options.version);
     new_info = load_snmp_info();
     close_session();
 
-    old_info = read_info();
     write_info(new_info);
 
     if (old_info == NULL) {

@@ -6,6 +6,7 @@
 #include "file.h"
 
 struct opt_s options;
+struct host_settings_s host_settings;
 
 size_t fw(const void *ptr, const size_t size, FILE *fp)
 {
@@ -26,11 +27,17 @@ void write_header(FILE *fp, u_int16_t records)
     memcpy(header.id, header_id, sizeof(header.id));
     header.version = header_version;
     header.records = records;
-    header.align = header_align;
     memset(header.__z1, '\0', sizeof(header.__z1));
     memset(header.__z2, '\0', sizeof(header.__z2));
 
-    fwrite(&header, sizeof(struct header_t), 1, fp);
+    header.flags = 0;
+    if (header_align)
+        header.flags += HEADER_FLAG_ALIGN;
+
+    if (host_settings.has_ifSpeed64)
+        header.flags += HEADER_FLAG_IFSPEED64;
+
+    fw(&header, sizeof(struct header_t), fp);
 }
 
 struct if_status_t *read_info()
@@ -57,6 +64,13 @@ struct if_status_t *read_info()
 
         return NULL;
     }
+
+    u_int8_t align = 0;
+    if ((header.flags & HEADER_FLAG_ALIGN) == HEADER_FLAG_ALIGN)
+        align = 1;
+
+    if ((header.flags & HEADER_FLAG_IFSPEED64) != HEADER_FLAG_IFSPEED64)
+        host_settings.has_ifSpeed64 = 0;
 
     struct if_status_t *first = NULL;
     struct if_status_t *curr = NULL;
@@ -86,7 +100,7 @@ struct if_status_t *read_info()
         if (prev)
             prev->next = curr;
 
-        if (header.align && (len % 16))
+        if (align && (len % 16))
             fseek(fp, 16 - (len % 16), SEEK_CUR);
     }
 
