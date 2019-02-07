@@ -61,7 +61,7 @@ load_t get_cpu_load(const oid *oid, const size_t oid_length)
     load_t temp = 0;
 
     get_pdu(oid, oid_length, &response);
-    check_response_errstat(&response);
+    check_response_errstat(response);
 
     vars = response->variables;
 

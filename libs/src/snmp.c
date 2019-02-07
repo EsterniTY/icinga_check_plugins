@@ -7,6 +7,7 @@
 #include "snmp.h"
 
 static struct snmp_session *ss;
+static u_int8_t _response_errstat_exit = ERRSTAT_EXIT;
 
 void init_session(char *host, char *community, long version)
 {
@@ -88,12 +89,21 @@ int get_pdu_bulk(const oid *coid,
                     coid, coid_length, response, max_repetitions);
 }
 
-
-void check_response_errstat(struct snmp_pdu **response)
+void set_response_errstat_exit(u_int8_t status)
 {
-    if ((*response)->errstat != SNMP_ERR_NOERROR) {
-        close_session();
-        snmp_free_pdu(*response);
-        exit_error(EXIT_CRITICAL, "Error communicating to host");
+    _response_errstat_exit = status;
+}
+
+long check_response_errstat(struct snmp_pdu *response)
+{
+    if (response->errstat != SNMP_ERR_NOERROR) {
+        snmp_free_pdu(response);
+
+        if (_response_errstat_exit == ERRSTAT_EXIT) {
+            close_session();
+            exit_error(EXIT_CRITICAL, "Error communicating to host");
+        }
     }
+
+    return response->errstat;
 }

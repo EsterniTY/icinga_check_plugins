@@ -5,6 +5,9 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 
+#define ERRSTAT_RETURN 0
+#define ERRSTAT_EXIT   1
+
 void init_session(char *host, char *community, long version);
 void close_session(void);
 int _get_pdu(int type,
@@ -23,6 +26,7 @@ int get_pdu_bulk(const oid *coid,
                  struct snmp_pdu **response,
                  int max_repetitions);
 
-void check_response_errstat(struct snmp_pdu **response);
+void set_response_errstat_exit(u_int8_t status);
+long check_response_errstat(struct snmp_pdu *response);
 
 #endif /* CHECK_LIBS_SNMP_H */
