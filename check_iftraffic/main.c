@@ -7,7 +7,6 @@
 #include "info.h"
 #include "file.h"
 #include "perfdata.h"
-#include "message.h"
 
 #ifdef DEBUG
 #include "debug.h"
