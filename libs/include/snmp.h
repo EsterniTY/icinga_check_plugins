@@ -8,6 +8,7 @@
 #define ERRSTAT_RETURN 0
 #define ERRSTAT_EXIT   1
 
+long try_session(char *host, char *community, long version);
 void init_session(char *host, char *community, long version);
 void close_session(void);
 int _get_pdu(int type,
