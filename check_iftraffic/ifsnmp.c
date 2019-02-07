@@ -79,7 +79,7 @@ char *ifEntryAlias(const oid coid)
     oid theOid[] = { 1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 1, coid };
 
     struct snmp_pdu *response;
-    char *value = calloc(1, sizeof(char));
+    char *value = NULL;
 
     get_pdu(theOid, OID_LENGTH(theOid), &response);
     check_response_errstat(response);
@@ -88,8 +88,9 @@ char *ifEntryAlias(const oid coid)
         size_t len = response->variables->val_len;
 
         if (len > 0) {
-            value = realloc(value, len * sizeof(char));
+            value = malloc((len + 1) * sizeof(char));
             memcpy(value, response->variables->val.string, len);
+            value[len] = '\0';
         }
     }
 

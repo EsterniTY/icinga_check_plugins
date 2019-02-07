@@ -22,25 +22,25 @@ size_t fr(void *ptr, const size_t size, FILE *fp)
 
 void write_header(FILE *fp, u_int16_t records)
 {
-    struct header_t header;
+    struct header_t *header = calloc(1, sizeof(struct header_t));
 
-    memcpy(header.id, header_id, sizeof(header.id));
-    header.version = header_version;
-    header.records = records;
-    memset(header.__z1, '\0', sizeof(header.__z1));
-    memset(header.__z2, '\0', sizeof(header.__z2));
+    memcpy(header->id, header_id, sizeof(header->id));
+    header->version = header_version;
+    header->records = records;
 
-    header.flags = 0;
+    header->flags = 0;
     if (header_align)
-        header.flags += HEADER_FLAG_ALIGN;
+        header->flags += HEADER_FLAG_ALIGN;
 
     if (host_settings.has_ifSpeed64)
-        header.flags += HEADER_FLAG_IFSPEED64;
+        header->flags += HEADER_FLAG_IFSPEED64;
 
     if (options.version == SNMP_VERSION_1)
-        header.flags += HEADER_FLAG_VERSION1;
+        header->flags += HEADER_FLAG_VERSION1;
 
-    fw(&header, sizeof(struct header_t), fp);
+    fw(header, sizeof(struct header_t), fp);
+
+    free(header);
 }
 
 struct if_status_t *read_info()
@@ -158,8 +158,7 @@ void write_info(struct if_status_t *info)
 
         if (header_align && (len % 16)) {
             u_int8_t l = 16 - (len % 16);
-            char *buf = malloc(l);
-            memset(buf, '\0', l);
+            char *buf = calloc(l, sizeof(char));
             len += fw(buf, l, fp);
             free(buf);
         }

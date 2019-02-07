@@ -133,7 +133,6 @@ void _work_on_pdu(struct variable_list **_vars,
         v_name = malloc(v_name_len * sizeof(char) + 1);
 
         memcpy(v_name, vars->val.string, vars->val_len);
-        strcat(&v_name[vars->val_len], " (");
         v_name[vars->val_len] = ' ';
         v_name[vars->val_len + 1] = '(';
         memcpy(&v_name[vars->val_len + 2], alias, alias_len);
