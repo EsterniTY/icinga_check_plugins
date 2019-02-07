@@ -37,6 +37,9 @@ void write_header(FILE *fp, u_int16_t records)
     if (host_settings.has_ifSpeed64)
         header.flags += HEADER_FLAG_IFSPEED64;
 
+    if (options.version == SNMP_VERSION_1)
+        header.flags += HEADER_FLAG_VERSION1;
+
     fw(&header, sizeof(struct header_t), fp);
 }
 
@@ -71,6 +74,9 @@ struct if_status_t *read_info()
 
     if ((header.flags & HEADER_FLAG_IFSPEED64) != HEADER_FLAG_IFSPEED64)
         host_settings.has_ifSpeed64 = 0;
+
+    if ((header.flags & HEADER_FLAG_VERSION1) == HEADER_FLAG_VERSION1)
+        options.version = SNMP_VERSION_1;
 
     struct if_status_t *first = NULL;
     struct if_status_t *curr = NULL;

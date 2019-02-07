@@ -21,8 +21,9 @@ static const char *__version = "1.0";
 void parse_args(int argc, char *argv[])
 {
     int opt;
+    options.version = -1;
 
-    while ((opt = getopt(argc, argv, "H:C:w:c:20hf:t:p:")) != -1)
+    while ((opt = getopt(argc, argv, "H:C:w:c:120hf:t:p:")) != -1)
     {
         switch (opt)
         {
@@ -37,6 +38,9 @@ void parse_args(int argc, char *argv[])
             break;
         case 'c':
             options.crit = (u_int) atoi(optarg);
+            break;
+        case '1':
+            options.version = SNMP_VERSION_1;
             break;
         case '2':
             options.version = SNMP_VERSION_2c;
@@ -65,8 +69,8 @@ void parse_args(int argc, char *argv[])
     if (!options.community)
         options.community = "public";
 
-    if (!options.version)
-        options.version = SNMP_VERSION_1;
+    if (options.version == -1)
+        options.version = SNMP_VERSION_2c;
 
     if (!options.filter)
         options.filter = NULL;
@@ -93,6 +97,7 @@ void print_help()
     puts("Options:");
     puts("\t-H    Host to check");
     puts("\t-C    SNMP community name ('public' is used if ommited)");
+    puts("\t-1    Use SNMP version 1");
     puts("\t-2    Use SNMP version 2c");
     puts("\t-w    Optional warning threshold");
     puts("\t-c    Optional critical threshold");

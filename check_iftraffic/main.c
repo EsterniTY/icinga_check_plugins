@@ -32,7 +32,8 @@ int main(int argc, char *argv[])
 
     old_info = read_info();
 
-    init_session(options.host, options.community, options.version);
+    options.version = try_session(options.host, options.community,
+                                  options.version);
     new_info = load_snmp_info();
     close_session();
 
