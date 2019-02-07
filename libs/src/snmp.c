@@ -10,6 +10,34 @@ static struct snmp_session *ss;
 static u_int8_t _response_errstat_exit = ERRSTAT_EXIT;
 static long _errstat = SNMP_ERR_NOERROR;
 
+long try_session(char *host, char *community, long version)
+{
+    long session_version = version;
+    init_session(host, community, version);
+
+    if (version != SNMP_VERSION_1) {
+        oid theOid[] = { 1, 3, 6, 1, 2, 1, 1, 1 };
+        struct snmp_pdu *response;
+        struct snmp_pdu *pdu;
+        int status;
+
+        pdu = snmp_pdu_create(SNMP_MSG_GET);
+        snmp_add_null_var(pdu, theOid, OID_LENGTH(theOid));
+        status = snmp_synch_response(ss, pdu, &response);
+
+        snmp_free_pdu(response);
+
+        if (status != STAT_SUCCESS) {
+            close_session();
+            init_session(host, community, SNMP_VERSION_1);
+            puts("Fallback to SNMP_VERSION_1");
+            session_version = SNMP_VERSION_1;
+        }
+    }
+
+    return session_version;
+}
+
 void init_session(char *host, char *community, long version)
 {
     struct snmp_session session;
