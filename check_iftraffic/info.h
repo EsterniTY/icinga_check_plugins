@@ -20,6 +20,9 @@
 #define IF_ADMIN_UP 1
 #define IF_OPER_UP  1
 
+#define IF_SPEED_1MB       1000000
+#define IF_SPEED_20MB      20000000
+
 void add_info(struct if_status_t **root,
               oid id,
               char *name,

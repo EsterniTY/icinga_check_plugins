@@ -73,9 +73,9 @@ void fill_info(struct if_status_t **curr, const struct variable_list *vars,
     if (speed == 0) {
         speed = ifEntry32(oid_ifSpeed32, curr_oid);
     } else
-        speed = speed * 1000000;
+        speed = speed * IF_SPEED_1MB;
 
-    if (speed < 20000000) {
+    if (speed < IF_SPEED_20MB || host_settings.has_ifSpeed64 == 0) {
         inOctets = ifEntry32(oid_ifInOctets32, curr_oid);
         outOctets = ifEntry32(oid_ifOutOctets32, curr_oid);
     } else {
