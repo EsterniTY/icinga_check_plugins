@@ -9,6 +9,7 @@
 
 static struct snmp_session *ss;
 static u_int8_t _response_errstat_exit = ERRSTAT_EXIT;
+static long _errstat = SNMP_ERR_NOERROR;
 
 #ifdef DEBUG
 static size_t _pdu_request_counter = 0;
@@ -114,15 +115,17 @@ void set_response_errstat_exit(u_int8_t status)
     _response_errstat_exit = status;
 }
 
-long check_response_errstat(struct snmp_pdu *response)
+void check_response_errstat(struct snmp_pdu *response)
 {
+    _errstat = response->errstat;
+
     if (response->errstat != SNMP_ERR_NOERROR) {
         long errstat = response->errstat;
         snmp_free_pdu(response);
 
         if (_response_errstat_exit == ERRSTAT_EXIT) {
             char *msg;
-            switch (errstat) {
+            switch (_errstat) {
             case SNMP_ERR_NOSUCHNAME:
                 msg = "No such name";
                 break;
@@ -135,8 +138,11 @@ long check_response_errstat(struct snmp_pdu *response)
             exit_error(EXIT_CRITICAL, msg);
         }
     }
+}
 
-    return response->errstat;
+long errstat()
+{
+    return _errstat;
 }
 
 #ifdef DEBUG

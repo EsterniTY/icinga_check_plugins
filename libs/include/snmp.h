@@ -27,7 +27,8 @@ int get_pdu_bulk(const oid *coid,
                  int max_repetitions);
 
 void set_response_errstat_exit(u_int8_t status);
-long check_response_errstat(struct snmp_pdu *response);
+void check_response_errstat(struct snmp_pdu *response);
+long errstat(void);
 
 #ifdef DEBUG
 size_t _get_pdu_requests(void);
