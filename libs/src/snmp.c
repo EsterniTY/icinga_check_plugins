@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
@@ -8,6 +9,10 @@
 
 static struct snmp_session *ss;
 static u_int8_t _response_errstat_exit = ERRSTAT_EXIT;
+
+#ifdef DEBUG
+static size_t _pdu_request_counter = 0;
+#endif
 
 void init_session(char *host, char *community, long version)
 {
@@ -42,6 +47,21 @@ int _get_pdu(int type,
 {
     struct snmp_pdu *pdu;
     int status;
+
+#ifdef DEBUG
+    _pdu_request_counter++;
+
+    char *str = calloc(4096, sizeof(char));
+    char p[10];
+    size_t len = 0;
+    for (int i = 0; i < (int)coid_length; i++) {
+        snprintf(p, 10, ".%lu", coid[i]);
+        len += strlen(p);
+        strcat(str, p);
+    }
+    str[len] = '\0';
+    printf("_get_pdu #%lu: %s\n", _pdu_request_counter, str);
+#endif
 
     pdu = snmp_pdu_create(type);
 
@@ -107,3 +127,10 @@ long check_response_errstat(struct snmp_pdu *response)
 
     return response->errstat;
 }
+
+#ifdef DEBUG
+size_t _get_pdu_requests(void)
+{
+    return _pdu_request_counter;
+}
+#endif

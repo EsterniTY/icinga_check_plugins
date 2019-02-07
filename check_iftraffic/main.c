@@ -127,6 +127,8 @@ int main(int argc, char *argv[])
 
 #ifdef DEBUG
     spacer("PerfData");
+    spacer("Debug");
+    printf("PDU Requests: %lu\n", _get_pdu_requests());
 #else
     perfdata_print(pf);
 #endif
