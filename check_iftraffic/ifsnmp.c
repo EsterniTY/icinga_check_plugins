@@ -11,7 +11,7 @@ u_int64_t ifEntry64(const oid coid1, const oid coid2)
     int status = 0;
 
     status = get_pdu(theOid, OID_LENGTH(theOid), &response);
-    check_response_errstat(&response);
+    check_response_errstat(response);
 
     switch (response->variables->type) {
     case ASN_GAUGE:
@@ -36,7 +36,7 @@ u_int32_t ifEntry32(const oid coid1, const oid coid2)
     u_int32_t value = 0;
 
     get_pdu(theOid, OID_LENGTH(theOid), &response);
-    check_response_errstat(&response);
+    check_response_errstat(response);
 
     switch (response->variables->type) {
     case ASN_COUNTER:
@@ -58,7 +58,7 @@ u_int8_t ifEntry8(const oid coid1, const oid coid2)
     u_int8_t value = 0;
 
     get_pdu(theOid, OID_LENGTH(theOid), &response);
-    check_response_errstat(&response);
+    check_response_errstat(response);
 
     if (response->variables->type == ASN_INTEGER)
         value = (u_int8_t) *response->variables->val.integer & 0xFF;
@@ -76,7 +76,7 @@ char *ifEntryAlias(const oid coid)
     char *value = calloc(1, sizeof(char));
 
     get_pdu(theOid, OID_LENGTH(theOid), &response);
-    check_response_errstat(&response);
+    check_response_errstat(response);
 
     if (response->variables->type == ASN_OCTET_STR) {
         size_t len = response->variables->val_len;

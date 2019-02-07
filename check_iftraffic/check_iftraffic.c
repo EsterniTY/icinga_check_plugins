@@ -131,7 +131,7 @@ struct if_status_t *load_snmp_info(void)
 
     while (can_go_next) {
         status = get_pdu_next(name, name_len, &response);
-        check_response_errstat(&response);
+        check_response_errstat(response);
 
         for (vars = response->variables; vars; vars = vars->next_variable) {
             if (snmp_oid_compare(end_oid, end_oid_len,
