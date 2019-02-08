@@ -167,6 +167,8 @@ void _work_on_pdu(struct variable_list **_vars,
         new_name_len = str_format(&new_name, v_name,
                                   options.filter,
                                   options.pattern);
+        free(v_name);
+        v_name = new_name;
         v_name_len = new_name_len;
     }
 
