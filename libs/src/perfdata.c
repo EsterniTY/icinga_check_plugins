@@ -75,7 +75,7 @@ void perfdata_print(struct perfdata *pf)
                    curr->bytes.min, curr->bytes.max);
             break;
         case UOM_PERCENT:
-            printf("'%s'=%.2f%%;%.2f;%.2f;%.2f;%.2f", curr->name,
+            printf("'%s'=%.2f%%;%.0f;%.0f;%.0f;%.0f", curr->name,
                    curr->percent.value,
                    curr->percent.warn, curr->percent.crit,
                    curr->percent.min, curr->percent.max);
