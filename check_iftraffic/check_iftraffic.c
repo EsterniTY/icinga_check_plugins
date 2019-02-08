@@ -247,9 +247,10 @@ size_t str_format(char **result, const char *subject,
     int rc;
     int i;
     size_t subject_len = strlen(subject);
+    size_t format_size = format == NULL ? 0 : strlen(format);
     int ovector[OVECCOUNT] = {0};
 
-    if (format == NULL || strlen(format) == 0)
+    if (format_size == 0)
         format = "$0";
 
     re = pcre_compile(pattern, 0, &error, &erroffset, NULL);
@@ -260,47 +261,43 @@ size_t str_format(char **result, const char *subject,
     rc = pcre_exec(re, NULL, subject, (int)subject_len,
                    0, 0, ovector, OVECCOUNT);
 
-    if (rc <= 0) {
-        pcre_free(re);
+    pcre_free(re);
+
+    if (rc <= 0 || rc > 99)
         return 0;
-    }
 
     size_t substr_len = 0;    // Substrings length
     size_t pat_len = 0;       // Patterns length
     size_t pat_sizes[OVECCOUNT / 2] = {0};
-    char pat_vector[OVECCOUNT / 2][10];
+    char pat_vector[OVECCOUNT / 2][4];
     char *tmp;
 
     for (i = 0; i < rc; i++) {
         if (ovector[2*i] < 0)
             continue;
 
-        snprintf(pat_vector[i], 10, "$%d", i);
-        pat_sizes[i] = strlen(pat_vector[i]);
+        pat_sizes[i] = 1 + (i < 10 ? 1 : 2);
+        snprintf(pat_vector[i], pat_sizes[i] + 1, "$%d", i);
 
-        tmp = strstr(format, pat_vector[i]);
-        if (!tmp)
+        if ((tmp = strstr(format, pat_vector[i])) == NULL)
             continue;
 
         substr_len += (size_t)(ovector[2*i+1] - ovector[2*i]);
-
         pat_len += pat_sizes[i];
     }
 
-    size_t format_size = strlen(format);
+    char *_result = calloc(4096, sizeof(char));
+    size_t insert_size = 0;
     size_t new_size = format_size - pat_len + substr_len;
-    char *_result = calloc(new_size + 1, sizeof(char));
     memcpy(_result, format, format_size);
 
     size_t start = 0;
-    size_t insert_size = 0;
     size_t end = format_size;
     for (i = 0; i < rc; i++) {
-        if (!pat_sizes[i])
+        if (ovector[2*i] < 0)
             continue;
 
-        tmp = strstr(_result, pat_vector[i]);
-        if (!tmp)
+        if ((tmp = strstr(_result, pat_vector[i])) == NULL)
             continue;
 
         start = (size_t)(tmp - _result) + pat_sizes[i];
@@ -310,14 +307,12 @@ size_t str_format(char **result, const char *subject,
             _result[k + insert_size - pat_sizes[i]] = _result[k];
 
         memcpy(tmp, &subject[ovector[2*i]], insert_size);
-
         end += insert_size - pat_sizes[i];
     }
 
-    if (re)
-        pcre_free(re);
-
-    *result = _result;
+    *result = calloc(new_size + 1, sizeof(char));
+    memcpy(*result, _result, new_size);
+    free(_result);
 
     return new_size;
 }
