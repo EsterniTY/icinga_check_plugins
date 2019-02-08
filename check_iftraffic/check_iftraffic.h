@@ -8,6 +8,7 @@
 #include "if_status.h"
 
 #define OVECCOUNT 30
+#define NUMBER_IF_PREFIX "Interface "
 
 extern struct opt_s {
     char *host;

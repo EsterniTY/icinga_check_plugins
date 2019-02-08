@@ -121,23 +121,43 @@ void _work_on_pdu(struct variable_list **_vars,
          alias_len = strlen(alias);
 
     if (alias_len == 0 || strcmp((char *)vars->val.string, alias) == 0) {
-        v_name_len = vars->val_len;
-        v_name = malloc(v_name_len * sizeof(char) + 1);
+        pcre *re;
+        const char *error;
+        int erroffset;
 
-        memcpy(v_name, vars->val.string, vars->val_len);
-        v_name[v_name_len] = '\0';
+        re = pcre_compile("^[0-9/]+$", 0, &error, &erroffset, NULL);
+
+        if (re == NULL)
+            exit_error(EXIT_UNKNOWN, "PCRE ERROR");
+
+        int ovector[OVECCOUNT] = {0};
+        int rc = pcre_exec(re, NULL, (char *)vars->val.string,
+                           (int)vars->val_len, 0, 0, ovector, OVECCOUNT);
+
+        pcre_free(re);
+
+        if (rc == 1) {
+            char *prefix = NUMBER_IF_PREFIX;
+            size_t prefix_len = strlen(NUMBER_IF_PREFIX);
+            v_name_len = vars->val_len + prefix_len;
+            v_name = calloc(v_name_len + 1, sizeof(char));
+            memcpy(v_name, prefix, prefix_len);
+            memcpy(&v_name[prefix_len], vars->val.string, vars->val_len);
+        } else {
+            v_name_len = vars->val_len;
+            v_name = calloc(v_name_len + 1, sizeof(char));
+            memcpy(v_name, vars->val.string, vars->val_len);
+        }
     }
     else {
-
         v_name_len = vars->val_len + alias_len + 3;
-        v_name = malloc(v_name_len * sizeof(char) + 1);
+        v_name = calloc(v_name_len + 1, sizeof(char));
 
         memcpy(v_name, vars->val.string, vars->val_len);
         v_name[vars->val_len] = ' ';
         v_name[vars->val_len + 1] = '(';
         memcpy(&v_name[vars->val_len + 2], alias, alias_len);
         v_name[v_name_len - 1] = ')';
-        v_name[v_name_len] = '\0';
     }
 
     char *new_name = NULL;
