@@ -247,11 +247,13 @@ size_t str_format(char **result, const char *subject,
     int rc;
     int i;
     size_t subject_len = strlen(subject);
-    size_t format_size = format == NULL ? 0 : strlen(format);
+    size_t format_len = format == NULL ? 0 : strlen(format);
     int ovector[OVECCOUNT] = {0};
 
-    if (format_size == 0)
+    if (format_len == 0) {
         format = "$0";
+        format_len = 2;
+    }
 
     re = pcre_compile(pattern, 0, &error, &erroffset, NULL);
 
@@ -288,16 +290,16 @@ size_t str_format(char **result, const char *subject,
 
     char *_result = calloc(4096, sizeof(char));
     size_t insert_size = 0;
-    size_t new_size = format_size - pat_len + substr_len;
-    memcpy(_result, format, format_size);
+    size_t new_size = format_len - pat_len + substr_len;
+    memcpy(_result, format, format_len);
 
     size_t start = 0;
-    size_t end = format_size;
+    size_t end = format_len;
     for (i = 0; i < rc; i++) {
         if (ovector[2*i] < 0)
             continue;
 
-        if ((tmp = strstr(_result, pat_vector[i])) == NULL)
+        if (!(tmp = strstr(_result, pat_vector[i])))
             continue;
 
         start = (size_t)(tmp - _result) + pat_sizes[i];
