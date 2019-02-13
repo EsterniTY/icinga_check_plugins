@@ -1,5 +1,4 @@
 #include "if_status.h"
-#include "ifsnmp.h"
 
 #include "info.h"
 #include "snmp.h"

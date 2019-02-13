@@ -9,7 +9,6 @@
 
 #include "snmp.h"
 #include "utils.h"
-#include "ifsnmp.h"
 #include "if_status.h"
 #include "info.h"
 #include "perfdata.h"
