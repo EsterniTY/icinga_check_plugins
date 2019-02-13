@@ -33,8 +33,5 @@ void add_info(struct if_status_t **root,
               u_int64_t inOctets,
               u_int64_t outOctets);
 void free_info(struct if_status_t *cell);
-void fill_info(struct if_status_t **curr, const struct variable_list *vars,
-               char *name, size_t name_len);
-
 
 #endif /* INFO_H */
