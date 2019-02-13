@@ -30,7 +30,9 @@ long try_session(char *host, char *community, long version)
         if (status != STAT_SUCCESS) {
             close_session();
             init_session(host, community, SNMP_VERSION_1);
+#ifdef DEBUG
             puts("Fallback to SNMP_VERSION_1");
+#endif
             session_version = SNMP_VERSION_1;
         }
     }
