@@ -40,7 +40,6 @@ int main(int argc, char *argv[])
     write_info(new_info);
 
     if (old_info == NULL) {
-        if (new_info)
             free_info(new_info);
 
         exit_error(EXIT_UNKNOWN, "Collecting data");
@@ -138,9 +137,6 @@ int main(int argc, char *argv[])
 
     perfdata_free(pf);
 
-    if (old_info)
-        free_info(old_info);
-
-    if (new_info)
-        free_info(new_info);
+    free_info(old_info);
+    free_info(new_info);
 }

@@ -10,6 +10,9 @@ struct host_settings_s host_settings;
 
 void free_info(struct if_status_t *cell)
 {
+    if (cell == NULL)
+        return;
+
     struct if_status_t *next = cell->next;
 
     if (cell->name)
