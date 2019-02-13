@@ -153,3 +153,63 @@ long errstat()
 {
     return _errstat;
 }
+
+void iterate_vars(oid *root, size_t root_length, long repetitions,
+                  size_t (*cc)(struct variable_list*, size_t idx),
+                  int (*ch)(int, struct snmp_pdu*))
+{
+    u_int8_t can_go_next = 1;
+    size_t idx = 0;
+
+    oid name[MAX_OID_LEN];
+    size_t name_len = root_length;
+
+    oid end[MAX_OID_LEN];
+    size_t end_len = root_length;
+
+    memmove(end, root, root_length * sizeof(oid));
+    end[end_len-1]++;
+
+    memmove(name, root, root_length * sizeof(oid));
+
+    while (can_go_next) {
+        struct snmp_pdu *pdu;
+        struct snmp_pdu *response;
+        struct variable_list *vars;
+        int status;
+
+        pdu = snmp_pdu_create(SNMP_MSG_GETBULK);
+        pdu->non_repeaters = 0;
+        pdu->max_repetitions = repetitions;
+
+        snmp_add_null_var(pdu, name, name_len);
+        status = snmp_synch_response(ss, pdu, &response);
+
+        if (ch == NULL) {
+            if (status != 0 || response->errstat != SNMP_ERR_NOERROR) {
+                snmp_free_pdu(response);
+                return;
+            }
+        } else if (ch(status, response) != 0) {
+            snmp_free_pdu(response);
+            return;
+        }
+
+        for (vars = response->variables; vars; vars = vars->next_variable) {
+            if (snmp_oid_compare(end, end_len,
+                                 vars->name, vars->name_length) <= 0) {
+                can_go_next = 0;
+                continue;
+            }
+
+            if (cc != NULL)
+                idx = cc(vars, idx);
+
+            memmove((char *)name, (char *)vars->name,
+                    vars->name_length * sizeof(oid));
+            name_len = vars->name_length;
+        }
+
+        snmp_free_pdu(response);
+    }
+}
