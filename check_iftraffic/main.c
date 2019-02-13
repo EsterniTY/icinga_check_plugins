@@ -37,10 +37,15 @@ int main(int argc, char *argv[])
     new_info = load_snmp_info();
     close_session();
 
+#ifdef DEBUG
+    printf("Host: >%s<\n", options.host);
+    printf("Filter: >%s<\nPattern: >%s<\n", options.filter, options.pattern);
+#endif
+
     write_info(new_info);
 
     if (old_info == NULL) {
-            free_info(new_info);
+        free_info(new_info);
 
         exit_error(EXIT_UNKNOWN, "Collecting data");
     }
