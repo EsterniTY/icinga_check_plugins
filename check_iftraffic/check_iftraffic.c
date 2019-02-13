@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pcre.h>
+#include <callback.h>
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
@@ -104,21 +105,40 @@ void print_help()
     puts("\t-0    Show interfaces in DOWN state");
 }
 
-void _work_on_pdu(struct variable_list **_vars,
-                  struct if_status_t **curr,
-                  struct if_status_t **info)
+static size_t _ifNumber = 0;
+static char **_ifAlias;
+static size_t *_ifAlias_len;
+static ifEntry64_t *_ifSpeed;
+static ifEntry64_t *_ifInOctets;
+static ifEntry64_t *_ifOutOctets;
+static ifEntry8_t  *_ifAdminState;
+static ifEntry8_t  *_ifOperState;
+
+static struct if_status_t *info = NULL;
+static struct if_status_t *curr = NULL;
+
+size_t _li_alias_cc(struct variable_list *vars, size_t idx)
 {
-    struct variable_list *vars = *_vars;
+    if (idx >= _ifNumber)
+        return idx;
 
-    oid theOid = vars->name[vars->name_length-1];
+    _ifAlias[idx] = calloc(vars->val_len + 1, sizeof(char));
+    _ifAlias_len[idx] = vars->val_len;
+    memmove(_ifAlias[idx], vars->val.string, vars->val_len);
 
-    char *alias;
+    return ++idx;
+}
+
+size_t _li_descr_cc(struct variable_list *vars, size_t idx)
+{
+    if (idx >= _ifNumber)
+        return idx;
+
     char *v_name;
-    size_t v_name_len = 0;
-    size_t alias_len = 0;
+    size_t v_name_len = vars->val_len;
 
-    if ((alias = ifEntryAlias(theOid)) != NULL)
-         alias_len = strlen(alias);
+    char *alias = _ifAlias[idx] /* _ifAlias->words[idx] */;
+    size_t alias_len = _ifAlias_len[idx] /* _ifAlias->sizes[idx] */;
 
     if (alias_len == 0 || strcmp((char *)vars->val.string, alias) == 0) {
         pcre *re;
@@ -173,67 +193,170 @@ void _work_on_pdu(struct variable_list **_vars,
     }
 
     if (!options.filter || new_name_len > 0) {
-        fill_info(curr, vars, v_name, v_name_len);
+        add_info(&curr, vars->name[vars->name_length-1],
+                 v_name, v_name_len,
+                 _ifAdminState[idx],
+                 _ifOperState[idx],
+                 _ifSpeed[idx],
+                 _ifInOctets[idx],
+                 _ifOutOctets[idx]
+                 );
 
-        if (!*info)
-            *info = *curr;
+        if (!info)
+            info = curr;
     }
 
     free(v_name);
-    free(alias);
+
+    return ++idx;
+}
+
+size_t _li_speed_cc(struct variable_list *vars, size_t idx)
+{
+    if (idx >= _ifNumber)
+        return idx;
+
+    _ifSpeed[idx] = (u_int64_t)(*vars->val.integer * IF_SPEED_1MB);
+
+    return ++idx;
+}
+
+size_t _li_in_octets_cc(struct variable_list *vars, size_t idx)
+{
+    if (idx >= _ifNumber)
+        return idx;
+
+    _ifInOctets[idx] = ((*vars->val.counter64).high << 32) +
+            (*vars->val.counter64).low;
+
+    return ++idx;
+}
+
+size_t _li_out_octets_cc(struct variable_list *vars, size_t idx)
+{
+    if (idx >= _ifNumber)
+        return idx;
+
+    _ifOutOctets[idx] = ((*vars->val.counter64).high << 32) +
+            (*vars->val.counter64).low;
+
+    return ++idx;
+}
+
+size_t _li_adm_state_cc(struct variable_list *vars, size_t idx)
+{
+    if (idx >= _ifNumber)
+        return idx;
+
+    _ifAdminState[idx] = *vars->val.integer & 0xFF;
+
+    return ++idx;
+}
+
+size_t _li_opr_state_cc(struct variable_list *vars, size_t idx)
+{
+    if (idx >= _ifNumber)
+        return idx;
+
+    _ifOperState[idx] = *vars->val.integer & 0xFF;
+
+    return ++idx;
+}
+
+size_t ifNumber(void) {
+    oid theOid[] = { 1, 3, 6, 1, 2, 1, 2, 1, 0 };
+
+    struct snmp_pdu *response;
+    size_t value = 0;
+    int status = 0;
+
+    status = get_pdu(theOid, OID_LENGTH(theOid), &response);
+
+    check_response_errstat(response);
+
+    switch (response->variables->type) {
+    case ASN_INTEGER:
+        value = *response->variables->val.integer & 0xFFFFFFFF;
+        break;
+    }
+
+    snmp_free_pdu(response);
+
+    return value;
 }
 
 struct if_status_t *load_snmp_info(void)
 {
-    struct snmp_pdu *response;
-    struct variable_list *vars;
+    _ifNumber = ifNumber();
 
-    int status = 0;
-    int can_go_next = 1;
+    _ifAlias = (char **)calloc(_ifNumber, sizeof(char *));
+    if (!_ifAlias)
+        exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifAlias)");
 
-    oid name[MAX_OID_LEN];
-    size_t name_len = MAX_OID_LEN;
+    _ifAlias_len = (size_t *)malloc(_ifNumber * sizeof(size_t));
+    if (!_ifAlias_len)
+        exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifAlias_len)");
 
-    oid end_oid[MAX_OID_LEN];
-    size_t end_oid_len = MAX_OID_LEN;
+    _ifSpeed = (ifEntry64_t *)calloc(_ifNumber, sizeof(ifEntry64_t));
+    if (!_ifSpeed)
+        exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifSpeed)");
 
-    struct if_status_t *info = NULL;
-    struct if_status_t *curr = NULL;
+    _ifInOctets = (ifEntry64_t *)calloc(_ifNumber, sizeof(ifEntry64_t));
+    if (!_ifInOctets)
+        exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifInOctets)");
 
-    oid root[] = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 2 };
+    _ifOutOctets = (ifEntry64_t *)calloc(_ifNumber, sizeof(ifEntry64_t));
+    if (!_ifOutOctets)
+        exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifOutOctets)");
 
-    memmove(end_oid, root, sizeof(root));
-    end_oid_len = OID_LENGTH(root);
-    end_oid[end_oid_len-1]++;
+    _ifAdminState = (ifEntry8_t *)calloc(_ifNumber, sizeof(ifEntry8_t));
+    if (!_ifAdminState)
+        exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifAdminState)");
 
-    memmove(name, root, sizeof(root));
-    name_len = OID_LENGTH(root);
+    _ifOperState = (ifEntry8_t *)calloc(_ifNumber, sizeof(ifEntry8_t));
+    if (!_ifOperState)
+        exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifOperState)");
 
-#ifdef DEBUG
-    printf("Filter: >%s<\nPattern: >%s<\n", options.filter, options.pattern);
-#endif
 
-    while (can_go_next) {
-        status = get_pdu_next(name, name_len, &response);
-        check_response_errstat(response);
+    oid oid_ifAlias[] = { 1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 1 };
+    iterate_vars(oid_ifAlias, OID_LENGTH(oid_ifAlias), 10,
+                 _li_alias_cc, NULL);
 
-        for (vars = response->variables; vars; vars = vars->next_variable) {
-            if (snmp_oid_compare(end_oid, end_oid_len,
-                                 vars->name, vars->name_length) <= 0) {
-                can_go_next = 0;
-                continue;
-            }
+    oid oid_ifHighSpeed[] = { 1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 15 };
+    iterate_vars(oid_ifHighSpeed, OID_LENGTH(oid_ifHighSpeed), 50,
+                 _li_speed_cc, NULL);
 
-            _work_on_pdu(&vars, &curr, &info);
+    oid oid_ifHCInOctets[] = { 1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 6 };
+    iterate_vars(oid_ifHCInOctets, OID_LENGTH(oid_ifHCInOctets), 50,
+                 _li_in_octets_cc, NULL);
 
-            memmove((char *)name, (char *)vars->name,
-                    vars->name_length * sizeof(oid));
-            name_len = vars->name_length;
-        }
+    oid oid_ifHCOutOctets[] = { 1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 10 };
+    iterate_vars(oid_ifHCOutOctets, OID_LENGTH(oid_ifHCOutOctets), 50,
+                 _li_out_octets_cc, NULL);
 
-        if (response)
-            snmp_free_pdu(response);
-    }
+    oid oid_ifAdminState[] = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 7 };
+    iterate_vars(oid_ifAdminState, OID_LENGTH(oid_ifAdminState), 50,
+                 _li_adm_state_cc, NULL);
+
+    oid oid_ifOperState[] = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 8 };
+    iterate_vars(oid_ifOperState, OID_LENGTH(oid_ifOperState), 50,
+                 _li_opr_state_cc, NULL);
+
+    oid oid_ifDescr[] = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 2 };
+    iterate_vars(oid_ifDescr, OID_LENGTH(oid_ifDescr), 10,
+                 _li_descr_cc, NULL);
+
+    free(_ifOperState);
+    free(_ifAdminState);
+    free(_ifOutOctets);
+    free(_ifInOctets);
+    free(_ifSpeed);
+    free(_ifAlias_len);
+
+    for (size_t i = 0; i < _ifNumber; i++)
+        free(_ifAlias[i]);
+
+    free(_ifAlias);
 
     return info;
 }

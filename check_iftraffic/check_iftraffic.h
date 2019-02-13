@@ -27,6 +27,9 @@ extern struct host_settings_s {
     u_int8_t has_ifSpeed64;
 } host_settings;
 
+typedef u_int64_t ifEntry64_t;
+typedef u_int8_t ifEntry8_t;
+
 extern struct if_status_t if_status[];
 
 void parse_args(int argc, char *argv[]);
