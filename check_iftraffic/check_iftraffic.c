@@ -389,7 +389,7 @@ struct if_status_t *load_snmp_info(void)
     iterate_vars(oid_ifOperState, OID_LENGTH(oid_ifOperState), 50,
                  _li_opr_state_cc, NULL);
 
-    oid oid_ifDescr[] = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 2 };
+    oid oid_ifDescr[] = { 1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 1 };
     iterate_vars(oid_ifDescr, OID_LENGTH(oid_ifDescr), 10,
                  _li_descr_cc, NULL);
 
