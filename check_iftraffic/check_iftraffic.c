@@ -133,6 +133,11 @@ size_t _li_descr_cc(struct variable_list *vars, size_t idx)
     if (idx >= _ifNumber)
         return idx;
 
+    if (options.downstate == 0 &&
+            (_ifOperState[idx] != IF_OPER_UP ||
+             _ifAdminState[idx] != IF_ADMIN_UP))
+            return ++idx;
+
     char *v_name;
     size_t v_name_len = vars->val_len;
 
