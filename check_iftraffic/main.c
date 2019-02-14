@@ -50,13 +50,6 @@ int main(int argc, char *argv[])
         exit_error(EXIT_UNKNOWN, "Collecting data");
     }
 
-    struct if_status_t *new = NULL;
-    struct if_status_t *old = NULL;
-    new = new_info;
-
-    struct perfdata *pf = NULL;
-    struct perfdata *pf_curr = pf;
-
 #ifdef DEBUG
     spacer("New Info");
     print_info_table(new_info);
@@ -66,6 +59,13 @@ int main(int argc, char *argv[])
     printf(format1, "oid", "ifName", "Speed?", "deltaTime (s)",
            "inDelta (b)", "outDelta (b)", "in bps", "out bps");
 #endif
+
+    struct if_status_t *new = NULL;
+    struct if_status_t *old = NULL;
+    new = new_info;
+
+    struct perfdata *pf = NULL;
+    struct perfdata *pf_curr = pf;
 
     while (new) {
         bytes_t inDelta = 0;
