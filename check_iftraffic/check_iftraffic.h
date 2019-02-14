@@ -6,9 +6,13 @@
 #include <net-snmp/net-snmp-includes.h>
 
 #include "if_status.h"
+#include "perfdata.h"
 
 #define OVECCOUNT 30
 #define NUMBER_IF_PREFIX "Interface "
+#define IF_USAGE "Interface %s usage in: %.2f%%%s (%'lu bps), out: %.2f%%%s (%'lu bps)"
+#define IF_USAGE_ALIAS "Interface %s (alias %s) usage in: %.2f%%%s (%'lu bps), out: %.2f%%%s (%'lu bps)"
+#define MESSAGE_BUFER_SIZE 160
 
 extern struct opt_s {
     char *host;
@@ -38,5 +42,11 @@ void print_help(void);
 struct if_status_t *load_snmp_info(void);
 size_t str_format(char **result, const char *subject,
                   const char *pattern, char *format);
+
+void add_msg(const struct if_status_t *item,
+             char ***stack, const size_t count,
+             const double in_p, const double out_p,
+             const bytes_t in, const bytes_t out
+             );
 
 #endif /* CHECK_IFTRAFFIC_H */

@@ -117,6 +117,47 @@ static ifEntry8_t  *_ifOperState;
 static struct if_status_t *info = NULL;
 static struct if_status_t *curr = NULL;
 
+void add_msg(const struct if_status_t *item,
+             char ***stack, const size_t count,
+             const double in_p, const double out_p,
+             const bytes_t in, const bytes_t out
+             )
+{
+    char **_stack = *stack;
+
+    if (_stack == NULL)
+        _stack = (char **)malloc(sizeof(char *));
+    else
+        _stack = (char **)realloc(_stack, (1 + count) * sizeof(char *));
+
+
+    char buf[MESSAGE_BUFER_SIZE] = {0};
+    if (item->alias_len == 0 || strcmp(item->name, item->alias) == 0)
+        snprintf(buf, 160, IF_USAGE,
+                item->name,
+                in_p,
+                (in_p>=options.crit ? "!!" : (in_p>=options.warn ? "!" : "")),
+                in,
+                out_p,
+                (out_p>=options.crit ? "!!" : (out_p>=options.warn ? "!" : "")),
+                out);
+    else
+        snprintf(buf, 160, IF_USAGE_ALIAS,
+                item->name, item->alias,
+                in_p,
+                (in_p>=options.crit ? "!!" : (in_p>=options.warn ? "!" : "")),
+                in,
+                out_p,
+                (out_p>=options.crit ? "!!" : (out_p>=options.warn ? "!" : "")),
+                out);
+
+    size_t msg_len = strlen(buf);
+    _stack[count] = (char *)calloc(msg_len+1, sizeof(char));
+    memmove(_stack[count], buf, msg_len);
+
+    *stack = _stack;
+}
+
 size_t _li_alias_cc(struct variable_list *vars, size_t idx)
 {
     if (idx >= _ifNumber)
