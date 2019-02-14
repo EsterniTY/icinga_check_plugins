@@ -23,9 +23,8 @@ int main(int argc, char *argv[])
 
     host_settings.has_ifSpeed64 = 1;
 
-#ifdef DEBUG
+    // Needed for pretty messages
     setlocale(LC_NUMERIC, "");
-#endif
 
     struct if_status_t *old_info = NULL;
     struct if_status_t *new_info = NULL;
@@ -67,6 +66,11 @@ int main(int argc, char *argv[])
     struct perfdata *pf = NULL;
     struct perfdata *pf_curr = pf;
 
+    char **msg_w = NULL;
+    char **msg_c = NULL;
+    size_t msg_w_count = 0;
+    size_t msg_c_count = 0;
+
     while (new) {
         bytes_t inDelta = 0;
         bytes_t outDelta = 0;
@@ -101,8 +105,14 @@ int main(int argc, char *argv[])
         out_bps = timeDelta ? outDelta / timeDelta : 0;
         warn = options.warn * (new->speed / 100);
         crit = options.crit * (new->speed / 100);
-        out_percent = (double)out_bps * 100 / new->speed;
-        in_percent = (double)in_bps * 100 / new->speed;
+
+        if (new->speed == 0) {
+            out_percent = 0;
+            in_percent = 0;
+        } else {
+            out_percent = (double)out_bps * 100 / new->speed;
+            in_percent = (double)in_bps * 100 / new->speed;
+        }
 
         pf_len = snprintf(pf_name, 40, "%s_traffic_in", new->name);
         perfdata_add_bytes(&pf_curr, pf_name, (size_t) pf_len,
@@ -125,6 +135,20 @@ int main(int argc, char *argv[])
                              in_percent, options.warn, options.crit,
                              0, 100);
 
+        if (options.crit > 0 &&
+                (out_percent >= options.crit
+                 || in_percent >= options.crit)) {
+            add_msg(new, &msg_c, msg_c_count++,
+                    in_percent, out_percent,
+                    in_bps, out_bps);
+        } else if (options.warn > 0 &&
+                   (out_percent >= options.warn
+                    || in_percent >= options.warn)) {
+            add_msg(new, &msg_w, msg_w_count++,
+                    in_percent, out_percent,
+                    in_bps, out_bps);
+        }
+
 #ifdef DEBUG
         print_delta_row(new->id, new->name, new->speed,
                         timeDelta, inDelta, outDelta,
@@ -134,17 +158,75 @@ int main(int argc, char *argv[])
         new = new->next;
     }
 
-#ifdef DEBUG
-    spacer("PerfData");
-    perfdata_print(pf);
+    code_t exit_code = EXIT_OK;
+
+#ifndef DEBUG
+    if (msg_c_count > 0) {
+        printf("CRITICAL - ");
+        exit_code = EXIT_CRITICAL;
+    } else if (msg_w_count) {
+        printf("WARNING - ");
+        exit_code = EXIT_WARNING;
+    } else
+        printf("OK - no problems");
 #else
-    perfdata_print(pf);
+    if (msg_c_count > 0)
+        exit_code = EXIT_CRITICAL;
+    else if (msg_w_count)
+        exit_code = EXIT_WARNING;
 #endif
 
+    if (msg_c_count > 0) {
+#ifdef DEBUG
+        spacer("Critical Messages");
+        for (size_t i = 0; i < msg_c_count; i++)
+            printf("[%lu] %s\n", strlen(msg_c[i]), msg_c[i]);
+#else
+        for (size_t i = 0; i < msg_c_count; i++) {
+            if (i == msg_c_count - 1 && msg_w_count == 0)
+                printf("%s", msg_c[i]);
+            else
+                puts(msg_c[i]);
+        }
+#endif
+    }
+
+    if (msg_w_count > 0) {
+#ifdef DEBUG
+        spacer("Warning Messages");
+        for (size_t i = 0; i < msg_w_count; i++)
+            printf("[%lu] %s\n", strlen(msg_w[i]), msg_w[i]);
+#else
+        for (size_t i = 0; i < msg_w_count; i++) {
+            if (i == msg_w_count - 1)
+                printf("%s", msg_w[i]);
+            else
+                puts(msg_w[i]);
+        }
+#endif
+    }
+
+#ifdef DEBUG
+    spacer("PerfData");
+#endif
+
+    perfdata_print(pf);
     perfdata_free(pf);
+
+    while (msg_c_count > 0)
+        free(msg_c[--msg_c_count]);
+    if (msg_c)
+        free(msg_c);
+
+    while (msg_w_count > 0)
+        free(msg_w[--msg_w_count]);
+    if (msg_w)
+        free(msg_w);
 
     free_info(old_info);
     free_info(new_info);
 
     free(options.cache_path);
+
+    return exit_code;
 }
