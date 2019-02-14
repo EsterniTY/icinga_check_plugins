@@ -141,8 +141,8 @@ size_t _li_descr_cc(struct variable_list *vars, size_t idx)
     char *v_name;
     size_t v_name_len = vars->val_len;
 
-    char *alias = _ifAlias[idx] /* _ifAlias->words[idx] */;
-    size_t alias_len = _ifAlias_len[idx] /* _ifAlias->sizes[idx] */;
+    char *alias = _ifAlias[idx];
+    size_t alias_len = _ifAlias_len[idx];
 
     if (alias_len == 0 || strcmp((char *)vars->val.string, alias) == 0) {
         pcre *re;
