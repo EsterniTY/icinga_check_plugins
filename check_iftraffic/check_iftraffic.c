@@ -324,7 +324,7 @@ struct if_status_t *load_snmp_info(void)
         exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifOperState)");
 
 
-    oid oid_ifAlias[] = { 1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 1 };
+    oid oid_ifAlias[] = { 1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 18 };
     iterate_vars(oid_ifAlias, OID_LENGTH(oid_ifAlias), 10,
                  _li_alias_cc, NULL);
 
