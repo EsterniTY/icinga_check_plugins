@@ -84,7 +84,8 @@ void parse_args(int argc, char *argv[])
     if (!options.cache_dir)
         options.cache_dir = "/tmp/mt";
 
-    options.cache_path = malloc(128);
+    size_t path_len = strlen(options.cache_dir) + strlen(options.host) + 6;
+    options.cache_path = calloc(path_len, sizeof(char));
     sprintf(options.cache_path, "%s/%s.dat", options.cache_dir, options.host);
 }
 

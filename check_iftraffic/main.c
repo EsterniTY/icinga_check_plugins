@@ -145,4 +145,6 @@ int main(int argc, char *argv[])
 
     free_info(old_info);
     free_info(new_info);
+
+    free(options.cache_path);
 }
