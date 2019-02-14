@@ -55,8 +55,8 @@ int main(int argc, char *argv[])
     spacer("Old Info");
     print_info_table(old_info);
     spacer("Delta");
-    printf(format1, "oid", "ifName", "Speed?", "deltaTime (s)",
-           "inDelta (b)", "outDelta (b)", "in bps", "out bps");
+    printf(format1, "oid", "ifName", "Speed", "deltaTime (s)",
+           "inDelta (B)", "outDelta (B)", "in bps", "out bps");
 #endif
 
     struct if_status_t *new = NULL;
@@ -80,8 +80,8 @@ int main(int argc, char *argv[])
             old = old_info;
             while (old) {
                 if (strcmp(new->name, old->name) == 0) {
-                    inDelta = new->inOctets - old->inOctets;
-                    outDelta = new->outOctets - old->outOctets;
+                    inDelta = (new->inOctets - old->inOctets) * 8;
+                    outDelta = (new->outOctets - old->outOctets) * 8;
                     timeDelta = (new->microtime - old->microtime) / 1000;
                     break;
                 }
