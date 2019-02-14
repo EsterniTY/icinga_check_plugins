@@ -94,9 +94,9 @@ struct if_status_t *read_info()
         len += fr(&curr->operState, sizeof(curr->operState), fp);
         len += fr(&curr->adminState, sizeof(curr->adminState), fp);
         len += fr(&curr->name_len, sizeof(curr->name_len), fp);
-        curr->name = malloc(curr->name_len + 1);
+        curr->name = (char *)calloc(curr->name_len + 1, sizeof(char));
         len += fr(curr->name, curr->name_len, fp);
-        curr->name[curr->name_len] = '\0';
+        curr->alias = NULL;
 
         curr->next = NULL;
 

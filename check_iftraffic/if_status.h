@@ -16,6 +16,8 @@ struct if_status_t {
     u_int8_t operState;  // 1
     size_t name_len;     // 8
     char *name;          // VAR
+    size_t alias_len;    // 8
+    char *alias;         // VAR
 
     struct if_status_t *next;
 };

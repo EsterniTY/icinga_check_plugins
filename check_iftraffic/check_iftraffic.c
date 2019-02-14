@@ -200,6 +200,7 @@ size_t _li_descr_cc(struct variable_list *vars, size_t idx)
     if (!options.filter || new_name_len > 0) {
         add_info(&curr, vars->name[vars->name_length-1],
                  v_name, v_name_len,
+                 _ifAlias[idx], _ifAlias_len[idx],
                  _ifAdminState[idx],
                  _ifOperState[idx],
                  _ifSpeed[idx],
