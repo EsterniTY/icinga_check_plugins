@@ -66,6 +66,11 @@ void perfdata_print(struct perfdata *pf)
 {
     struct perfdata *curr = pf;
 
+#ifndef DEBUG
+    if (pf != NULL)
+        printf(" | ");
+#endif
+
     while (curr != NULL) {
         switch (curr->uom) {
         case UOM_BYTES:
