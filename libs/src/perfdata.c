@@ -11,13 +11,12 @@ void perfdata_add_bytes(struct perfdata **root,
                         bytes_t min, bytes_t max)
 {
     struct perfdata *_root = *root;
-    struct perfdata *new = malloc(sizeof (struct perfdata));
+    struct perfdata *new = calloc(1, sizeof(struct perfdata));
 
     new->uom = UOM_BYTES;
     new->name_len = name_len;
-    new->name = malloc(name_len + 1);
+    new->name = (char *)calloc(name_len + 1, sizeof(char));
     memcpy(new->name, name, name_len);
-    new->name[name_len] = '\0';
 
     new->bytes.value = value;
     new->bytes.warn = warn;
@@ -40,13 +39,12 @@ void perfdata_add_percent(struct perfdata **root,
                           percent_t min, percent_t max)
 {
     struct perfdata *_root = *root;
-    struct perfdata *new = malloc(sizeof (struct perfdata));
+    struct perfdata *new = calloc(1, sizeof(struct perfdata));
 
     new->uom = UOM_PERCENT;
     new->name_len = name_len;
-    new->name = malloc(name_len + 1);
+    new->name = (char *)calloc(name_len + 1, sizeof(char));
     memcpy(new->name, name, name_len);
-    new->name[name_len] = '\0';
 
     new->percent.value = value;
     new->percent.warn = warn;
