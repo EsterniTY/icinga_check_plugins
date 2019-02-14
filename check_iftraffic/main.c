@@ -136,6 +136,7 @@ int main(int argc, char *argv[])
 
 #ifdef DEBUG
     spacer("PerfData");
+    perfdata_print(pf);
 #else
     perfdata_print(pf);
 #endif
