@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <pcre.h>
 #include <callback.h>
+#include <openssl/md5.h>
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
@@ -84,9 +85,32 @@ void parse_args(int argc, char *argv[])
     if (!options.cache_dir)
         options.cache_dir = "/tmp/mt";
 
-    size_t path_len = strlen(options.cache_dir) + strlen(options.host) + 6;
+    char *uid = calloc(256, sizeof(char));
+    snprintf(uid, 256, "%s;%s;%s;%s;%d;%ld",
+             options.host, options.community,
+             options.filter, options.pattern,
+             options.downstate, options.version);
+
+    unsigned char digest[16];
+    char *md5 = (char*)calloc(33, sizeof(char));
+    MD5_CTX c;
+    size_t length = strlen(uid);
+
+    MD5_Init(&c);
+    MD5_Update(&c, uid, length);
+    MD5_Final(digest, &c);
+
+    for (int n = 0; n < 16; ++n) {
+        snprintf(&(md5[n*2]), 3, "%02x", (unsigned int)digest[n]);
+    }
+
+    size_t path_len = strlen(options.cache_dir) + strlen(options.host) + 6 + 32;
     options.cache_path = calloc(path_len, sizeof(char));
-    sprintf(options.cache_path, "%s/%s.dat", options.cache_dir, options.host);
+    sprintf(options.cache_path, "%s/%s-%s.dat",
+            options.cache_dir, options.host, md5);
+
+    free(uid);
+    free(md5);
 }
 
 void print_help()
