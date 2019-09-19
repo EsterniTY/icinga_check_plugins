@@ -25,6 +25,7 @@ tags
 *.debug
 Makefile*
 CMakeLists.txt.user
+CMakeLists.txt.user.*
 *.prl
 *.app
 moc_*.cpp
