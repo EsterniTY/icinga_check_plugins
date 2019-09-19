@@ -117,16 +117,22 @@ void print_help()
 {
     printf("Check interface utilisation. ");
     printf("Version %s.\n\n", __version);
-    printf("Usage: %s -H <host_address> [-C <community>] [-2]\n", __progname);
+    printf("Usage: %s -H <host_address> [-C <community>] [-1|-2]\n", __progname);
     puts("\t[-w <warning>] [-c <critical>]");
+    puts("\t[-0] [-f <filter>] [-p <pattern>] [-t <dir_path>]");
     puts("Options:");
     puts("\t-H    Host to check");
     puts("\t-C    SNMP community name ('public' is used if ommited)");
     puts("\t-1    Use SNMP version 1");
-    puts("\t-2    Use SNMP version 2c");
+    puts("\t-2    Use SNMP version 2c (default)");
     puts("\t-w    Optional warning threshold");
     puts("\t-c    Optional critical threshold");
     puts("\t-0    Show interfaces in DOWN state");
+    puts("\t-f    Interfaces filter (perl compotable regular expression)");
+    puts("\t-p    Interfaces pattern (use $1, $2, etc to include appropriate");
+    puts("\t      capturing group string, defined in -f option");
+    puts("\t-t    Cache directory (/tmp/mt if ommited)");
+    puts("\t-h    Show this help");
 }
 
 static size_t _ifNumber = 0;
