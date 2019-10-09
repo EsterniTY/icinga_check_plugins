@@ -31,8 +31,9 @@ void parse_args(int argc, char *argv[])
     options.filter = NULL;
     options.pattern = NULL;
     options.downstate = 0;
+    options.speed = 0;
 
-    while ((opt = getopt(argc, argv, "H:C:w:c:120hf:t:p:")) != -1)
+    while ((opt = getopt(argc, argv, "H:C:w:c:120hf:t:p:S:")) != -1)
     {
         switch (opt)
         {
@@ -66,6 +67,9 @@ void parse_args(int argc, char *argv[])
         case 't':
             options.cache_dir = optarg;
             break;
+        case 'S':
+            options.speed = (u_long) ((u_int) atoi(optarg)) * 1000000;
+            break;
         case 'h':
             print_help();
             exit(0);
@@ -76,10 +80,10 @@ void parse_args(int argc, char *argv[])
         exit_error(EXIT_CRITICAL, "No host defined");
 
     char *uid = calloc(256, sizeof(char));
-    snprintf(uid, 256, "%s;%s;%s;%s;%d;%ld",
+    snprintf(uid, 256, "%s;%s;%s;%s;%d;%ld;%lu",
              options.host, options.community,
              options.filter, options.pattern,
-             options.downstate, options.version);
+             options.downstate, options.version, options.speed);
 
     unsigned char digest[16];
     char *md5 = (char*)calloc(33, sizeof(char));
@@ -108,19 +112,20 @@ void print_help()
     printf("Check interface utilisation. ");
     printf("Version %s.\n\n", __version);
     printf("Usage: %s -H <host_address> [-C <community>] [-1|-2]\n", __progname);
-    puts("\t[-w <warning>] [-c <critical>]");
+    puts("\t[-w <warning>] [-c <critical>] [-S <speed>]");
     puts("\t[-0] [-f <filter>] [-p <pattern>] [-t <dir_path>]");
     puts("Options:");
     puts("\t-H    Host to check");
     puts("\t-C    SNMP community name ('public' is used if ommited)");
     puts("\t-1    Use SNMP version 1");
     puts("\t-2    Use SNMP version 2c (default)");
-    puts("\t-w    Optional warning threshold");
-    puts("\t-c    Optional critical threshold");
+    puts("\t-w    Optional warning threshold (in percent)");
+    puts("\t-c    Optional critical threshold (in percent)");
+    puts("\t-S    Manualy specify interface speed (in megabytes)");
     puts("\t-0    Show interfaces in DOWN state");
     puts("\t-f    Interfaces filter (perl compotable regular expression)");
     puts("\t-p    Interfaces pattern (use $1, $2, etc to include appropriate");
-    puts("\t      capturing group string, defined in -f option");
+    puts("\t      capturing group string, defined in -f option)");
     puts("\t-t    Cache directory (/tmp/mt if ommited)");
     puts("\t-h    Show this help");
 }
