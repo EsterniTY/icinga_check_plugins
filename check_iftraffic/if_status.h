@@ -6,6 +6,9 @@
 #include <net-snmp/net-snmp-includes.h>
 #include "utils.h"
 
+#define OCTET_MAX_VALUE 0xFFFFFFFFFFFFFFFF
+#define octet_delta(a, b) ((a)>(b) ? (OCTET_MAX_VALUE-a+b) : (b-a))
+
 struct if_status_t {
     mtime_t microtime;   // 8
     oid id;              // 8
