@@ -22,7 +22,15 @@ static const char *__version = "1.0";
 void parse_args(int argc, char *argv[])
 {
     int opt;
-    options.version = -1;
+    options.host = NULL;
+    options.community = "public";
+    options.version = SNMP_VERSION_2c;
+    options.warn = 0;
+    options.crit = 0;
+    options.cache_dir = "/tmp/mt";
+    options.filter = NULL;
+    options.pattern = NULL;
+    options.downstate = 0;
 
     while ((opt = getopt(argc, argv, "H:C:w:c:120hf:t:p:")) != -1)
     {
@@ -66,24 +74,6 @@ void parse_args(int argc, char *argv[])
 
     if (options.host == NULL)
         exit_error(EXIT_CRITICAL, "No host defined");
-
-    if (!options.community)
-        options.community = "public";
-
-    if (options.version == -1)
-        options.version = SNMP_VERSION_2c;
-
-    if (!options.filter)
-        options.filter = NULL;
-
-    if (!options.pattern)
-        options.pattern = NULL;
-
-    if (!options.downstate)
-        options.downstate = 0;
-
-    if (!options.cache_dir)
-        options.cache_dir = "/tmp/mt";
 
     char *uid = calloc(256, sizeof(char));
     snprintf(uid, 256, "%s;%s;%s;%s;%d;%ld",
