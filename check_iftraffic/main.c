@@ -80,8 +80,8 @@ int main(int argc, char *argv[])
             old = old_info;
             while (old) {
                 if (strcmp(new->name, old->name) == 0) {
-                    inDelta = (new->inOctets - old->inOctets) * 8;
-                    outDelta = (new->outOctets - old->outOctets) * 8;
+                    inDelta = octet_delta(old->inOctets, new->inOctets) * 8;
+                    outDelta = octet_delta(old->outOctets, new->outOctets) * 8;
                     timeDelta = (new->microtime - old->microtime) / 1000;
                     break;
                 }
