@@ -97,33 +97,35 @@ int main(int argc, char *argv[])
         bytes_t out_bps;
         bytes_t warn;
         bytes_t crit;
+        bytes_t speed = options.speed ? options.speed : new->speed;
 
         double out_percent;
         double in_percent;
 
         in_bps = timeDelta  ? inDelta / timeDelta : 0;
         out_bps = timeDelta ? outDelta / timeDelta : 0;
-        warn = options.warn * (new->speed / 100);
-        crit = options.crit * (new->speed / 100);
 
-        if (new->speed == 0) {
+        warn = options.warn * (speed / 100);
+        crit = options.crit * (speed / 100);
+
+        if (speed == 0) {
             out_percent = 0;
             in_percent = 0;
         } else {
-            out_percent = (double)out_bps * 100 / new->speed;
-            in_percent = (double)in_bps * 100 / new->speed;
+            out_percent = (double)out_bps * 100 / speed;
+            in_percent = (double)in_bps * 100 / speed;
         }
 
         pf_len = snprintf(pf_name, 40, "%s_traffic_in", new->name);
         perfdata_add_bytes(&pf_curr, pf_name, (size_t) pf_len,
-                           in_bps, warn, crit, 0, new->speed);
+                           in_bps, warn, crit, 0, speed);
 
         if (!pf)
             pf = pf_curr;
 
         pf_len = snprintf(pf_name, 40, "%s_traffic_out", new->name);
         perfdata_add_bytes(&pf_curr, pf_name, (size_t) pf_len,
-                           out_bps, warn, crit, 0, new->speed);
+                           out_bps, warn, crit, 0, speed);
 
         pf_len = snprintf(pf_name, 40, "%s_usage_out", new->name);
         perfdata_add_percent(&pf_curr, pf_name, (size_t) pf_len,
@@ -150,7 +152,7 @@ int main(int argc, char *argv[])
         }
 
 #ifdef DEBUG
-        print_delta_row(new->id, new->name, new->speed,
+        print_delta_row(new->id, new->name, speed,
                         timeDelta, inDelta, outDelta,
                         in_bps, out_bps);
 #endif

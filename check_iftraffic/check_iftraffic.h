@@ -25,6 +25,7 @@ extern struct opt_s {
     char *filter;
     char *pattern;
     u_int downstate;
+    u_long speed;
 } options;
 
 extern struct host_settings_s {
