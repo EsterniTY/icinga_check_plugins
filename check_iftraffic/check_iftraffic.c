@@ -80,10 +80,11 @@ void parse_args(int argc, char *argv[])
         exit_error(EXIT_CRITICAL, "No host defined");
 
     char *uid = calloc(256, sizeof(char));
-    snprintf(uid, 256, "%s;%s;%s;%s;%d;%ld;%lu",
+    snprintf(uid, 256, "%s;%s;%s;%s;%d;%ld;%lu;%s",
              options.host, options.community,
              options.filter, options.pattern,
-             options.downstate, options.version, options.speed);
+             options.downstate, options.version, options.speed,
+             getenv("USER"));
 
     unsigned char digest[16];
     char *md5 = (char*)calloc(33, sizeof(char));
