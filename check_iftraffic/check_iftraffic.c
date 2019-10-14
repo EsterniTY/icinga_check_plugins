@@ -366,34 +366,13 @@ struct if_status_t *load_snmp_info(void)
 {
     _ifNumber = ifNumber();
 
-    _ifAlias = (char **)calloc(_ifNumber, sizeof(char *));
-    if (!_ifAlias)
-        exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifAlias)");
-
-    _ifAlias_len = (size_t *)malloc(_ifNumber * sizeof(size_t));
-    if (!_ifAlias_len)
-        exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifAlias_len)");
-
-    _ifSpeed = (ifEntry64_t *)calloc(_ifNumber, sizeof(ifEntry64_t));
-    if (!_ifSpeed)
-        exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifSpeed)");
-
-    _ifInOctets = (ifEntry64_t *)calloc(_ifNumber, sizeof(ifEntry64_t));
-    if (!_ifInOctets)
-        exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifInOctets)");
-
-    _ifOutOctets = (ifEntry64_t *)calloc(_ifNumber, sizeof(ifEntry64_t));
-    if (!_ifOutOctets)
-        exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifOutOctets)");
-
-    _ifAdminState = (ifEntry8_t *)calloc(_ifNumber, sizeof(ifEntry8_t));
-    if (!_ifAdminState)
-        exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifAdminState)");
-
-    _ifOperState = (ifEntry8_t *)calloc(_ifNumber, sizeof(ifEntry8_t));
-    if (!_ifOperState)
-        exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifOperState)");
-
+    IF_ALLOC(_ifAlias, char *);
+    IF_ALLOC(_ifAlias_len, size_t);
+    IF_ALLOC_64(_ifSpeed);
+    IF_ALLOC_64(_ifInOctets);
+    IF_ALLOC_64(_ifOutOctets);
+    IF_ALLOC_8(_ifAdminState);
+    IF_ALLOC_8(_ifOperState);
 
     oid oid_ifAlias[] = { 1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 18 };
     iterate_vars(oid_ifAlias, OID_LENGTH(oid_ifAlias), 10,

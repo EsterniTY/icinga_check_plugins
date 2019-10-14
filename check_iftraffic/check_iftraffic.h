@@ -14,6 +14,14 @@
 #define IF_USAGE_ALIAS "Interface %s (alias %s) usage in: %.2f%%%s (%'lu bps), out: %.2f%%%s (%'lu bps)"
 #define MESSAGE_BUFER_SIZE 160
 
+#define IF_ALLOC(name, size) \
+    name = (size *)malloc(_ifNumber * sizeof(size)); \
+    if (!name) \
+        exit_error(EXIT_UNKNOWN, "Unable to allocate memory")
+
+#define IF_ALLOC_8(name) IF_ALLOC(name, ifEntry8_t)
+#define IF_ALLOC_64(name) IF_ALLOC(name, ifEntry64_t)
+
 extern struct opt_s {
     char *host;
     char *community;
