@@ -187,7 +187,14 @@ void iterate_vars(oid *root, size_t root_length, long repetitions,
         status = snmp_synch_response(ss, pdu, &response);
 
         if (ch == NULL) {
-            if (status != 0 || response->errstat != SNMP_ERR_NOERROR) {
+            if (status != STAT_SUCCESS) {
+                snmp_free_pdu(response);
+                exit_error(EXIT_CRITICAL, (status == STAT_ERROR
+                                           ? "SNMP response error"
+                                           : "SNMP response timedout"));
+            }
+
+            if (response->errstat != SNMP_ERR_NOERROR) {
                 snmp_free_pdu(response);
                 return;
             }
