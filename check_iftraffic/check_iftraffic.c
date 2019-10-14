@@ -99,7 +99,11 @@ void parse_args(int argc, char *argv[])
         snprintf(&(md5[n*2]), 3, "%02x", (unsigned int)digest[n]);
     }
 
-    size_t path_len = strlen(options.cache_dir) + strlen(options.host) + 6 + 32;
+    size_t path_len = strlen(options.cache_dir) + strlen(options.host)
+            + 32 // strlen(md5)
+            + 6 // strlen(of_slashes_dots_and_extension)
+            + 1; // NULL byte
+
     options.cache_path = calloc(path_len, sizeof(char));
     sprintf(options.cache_path, "%s/%s-%s.dat",
             options.cache_dir, options.host, md5);
