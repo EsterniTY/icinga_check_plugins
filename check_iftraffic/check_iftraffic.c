@@ -374,33 +374,13 @@ struct if_status_t *load_snmp_info(void)
     IF_ALLOC_8(_ifAdminState);
     IF_ALLOC_8(_ifOperState);
 
-    oid oid_ifAlias[] = { 1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 18 };
-    iterate_vars(oid_ifAlias, OID_LENGTH(oid_ifAlias), 10,
-                 _li_alias_cc, NULL);
-
-    oid oid_ifHighSpeed[] = { 1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 15 };
-    iterate_vars(oid_ifHighSpeed, OID_LENGTH(oid_ifHighSpeed), 50,
-                 _li_speed_cc, NULL);
-
-    oid oid_ifHCInOctets[] = { 1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 6 };
-    iterate_vars(oid_ifHCInOctets, OID_LENGTH(oid_ifHCInOctets), 50,
-                 _li_in_octets_cc, NULL);
-
-    oid oid_ifHCOutOctets[] = { 1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 10 };
-    iterate_vars(oid_ifHCOutOctets, OID_LENGTH(oid_ifHCOutOctets), 50,
-                 _li_out_octets_cc, NULL);
-
-    oid oid_ifAdminState[] = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 7 };
-    iterate_vars(oid_ifAdminState, OID_LENGTH(oid_ifAdminState), 50,
-                 _li_adm_state_cc, NULL);
-
-    oid oid_ifOperState[] = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 8 };
-    iterate_vars(oid_ifOperState, OID_LENGTH(oid_ifOperState), 50,
-                 _li_opr_state_cc, NULL);
-
-    oid oid_ifDescr[] = { 1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 1 };
-    iterate_vars(oid_ifDescr, OID_LENGTH(oid_ifDescr), 10,
-                 _li_descr_cc, NULL);
+    iterate_oid(".1.3.6.1.2.1.31.1.1.1.18", 10, _li_alias_cc);
+    iterate_oid(".1.3.6.1.2.1.31.1.1.1.15", 50, _li_speed_cc);
+    iterate_oid(".1.3.6.1.2.1.31.1.1.1.6", 50, _li_in_octets_cc);
+    iterate_oid(".1.3.6.1.2.1.31.1.1.1.10", 50, _li_out_octets_cc);
+    iterate_oid(".1.3.6.1.2.1.2.2.1.7", 50, _li_adm_state_cc);
+    iterate_oid(".1.3.6.1.2.1.2.2.1.8", 50, _li_opr_state_cc);
+    iterate_oid(".1.3.6.1.2.1.31.1.1.1.1", 10, _li_descr_cc);
 
     free(_ifOperState);
     free(_ifAdminState);
@@ -496,4 +476,18 @@ size_t str_format(char **result, const char *subject,
     free(_result);
 
     return new_size;
+}
+
+void iterate_oid(char *o, int num,
+                 size_t (*callback)(struct variable_list *, size_t))
+{
+    size_t o_len = MAX_OID_LEN;
+    oid o_oid[MAX_OID_LEN];
+
+    if (!snmp_parse_oid(o, o_oid, &o_len)) {
+        SOCK_CLEANUP;
+        exit_error(EXIT_UNKNOWN, o);
+    }
+
+    iterate_vars(o_oid, o_len, num, callback, NULL);
 }
