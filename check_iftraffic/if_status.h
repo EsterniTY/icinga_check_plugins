@@ -9,14 +9,18 @@
 #define OCTET_MAX_VALUE 0xFFFFFFFFFFFFFFFF
 #define octet_delta(a, b) ((a)>(b) ? (OCTET_MAX_VALUE-a+b) : (b-a))
 
+typedef u_int8_t ifEntry8_t;
+typedef u_int32_t ifEntry32_t;
+typedef u_int64_t ifEntry64_t;
+
 struct if_status_t {
     mtime_t microtime;   // 8
     oid id;              // 8
-    u_int64_t speed;     // 8
-    u_int64_t inOctets;  // 8
-    u_int64_t outOctets; // 8
-    u_int8_t adminState; // 1
-    u_int8_t operState;  // 1
+    ifEntry64_t speed;     // 8
+    ifEntry64_t inOctets;  // 8
+    ifEntry64_t outOctets; // 8
+    ifEntry8_t adminState; // 1
+    ifEntry8_t operState;  // 1
     size_t name_len;     // 8
     char *name;          // VAR
     size_t alias_len;    // 8
