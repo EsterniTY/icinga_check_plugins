@@ -14,6 +14,8 @@
 #define IF_USAGE_ALIAS "Interface %s (alias %s) usage in: %.2f%%%s (%'lu bps), out: %.2f%%%s (%'lu bps)"
 #define MESSAGE_BUFER_SIZE 160
 
+#define CHECK_IDX if (idx >= _ifNumber) return idx
+
 #define IF_ALLOC(name, size) \
     name = (size *)malloc(_ifNumber * sizeof(size)); \
     if (!name) \

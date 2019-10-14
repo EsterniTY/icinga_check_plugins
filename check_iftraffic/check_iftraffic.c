@@ -190,8 +190,7 @@ void add_msg(const struct if_status_t *item,
 
 size_t _li_alias_cc(struct variable_list *vars, size_t idx)
 {
-    if (idx >= _ifNumber)
-        return idx;
+    CHECK_IDX;
 
     _ifAlias[idx] = calloc(vars->val_len + 1, sizeof(char));
     _ifAlias_len[idx] = vars->val_len;
@@ -202,8 +201,7 @@ size_t _li_alias_cc(struct variable_list *vars, size_t idx)
 
 size_t _li_descr_cc(struct variable_list *vars, size_t idx)
 {
-    if (idx >= _ifNumber)
-        return idx;
+    CHECK_IDX;
 
     if (options.downstate == 0 &&
             (_ifOperState[idx] != IF_OPER_UP ||
@@ -290,8 +288,7 @@ size_t _li_descr_cc(struct variable_list *vars, size_t idx)
 
 size_t _li_speed_cc(struct variable_list *vars, size_t idx)
 {
-    if (idx >= _ifNumber)
-        return idx;
+    CHECK_IDX;
 
     _ifSpeed[idx] = (u_int64_t)(*vars->val.integer * IF_SPEED_1MB);
 
@@ -300,8 +297,7 @@ size_t _li_speed_cc(struct variable_list *vars, size_t idx)
 
 size_t _li_in_octets_cc(struct variable_list *vars, size_t idx)
 {
-    if (idx >= _ifNumber)
-        return idx;
+    CHECK_IDX;
 
     _ifInOctets[idx] = ((*vars->val.counter64).high << 32) +
             (*vars->val.counter64).low;
@@ -311,8 +307,7 @@ size_t _li_in_octets_cc(struct variable_list *vars, size_t idx)
 
 size_t _li_out_octets_cc(struct variable_list *vars, size_t idx)
 {
-    if (idx >= _ifNumber)
-        return idx;
+    CHECK_IDX;
 
     _ifOutOctets[idx] = ((*vars->val.counter64).high << 32) +
             (*vars->val.counter64).low;
@@ -322,8 +317,7 @@ size_t _li_out_octets_cc(struct variable_list *vars, size_t idx)
 
 size_t _li_adm_state_cc(struct variable_list *vars, size_t idx)
 {
-    if (idx >= _ifNumber)
-        return idx;
+    CHECK_IDX;
 
     _ifAdminState[idx] = *vars->val.integer & 0xFF;
 
@@ -332,8 +326,7 @@ size_t _li_adm_state_cc(struct variable_list *vars, size_t idx)
 
 size_t _li_opr_state_cc(struct variable_list *vars, size_t idx)
 {
-    if (idx >= _ifNumber)
-        return idx;
+    CHECK_IDX;
 
     _ifOperState[idx] = *vars->val.integer & 0xFF;
 
