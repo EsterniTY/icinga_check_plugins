@@ -44,6 +44,12 @@ void perfdata_add_bytes(struct perfdata **root,
                         bytes_t warn, bytes_t crit,
                         bytes_t min, bytes_t max);
 
+void perfdata_add_normal(struct perfdata **root,
+                         char *name, size_t name_len,
+                         bytes_t value,
+                         bytes_t warn, bytes_t crit,
+                         bytes_t min, bytes_t max);
+
 void perfdata_add_percent(struct perfdata **root,
                           char *name, size_t name_len,
                           percent_t value,

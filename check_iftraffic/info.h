@@ -29,11 +29,13 @@ void add_info(struct if_status_t **root,
               size_t name_len,
               char *alias,
               size_t alias_len,
-              u_int8_t adminState,
-              u_int8_t operState,
-              u_int64_t speed,
-              u_int64_t inOctets,
-              u_int64_t outOctets);
+              ifEntry8_t adminState,
+              ifEntry8_t operState,
+              ifEntry64_t speed,
+              ifEntry64_t inOctets,
+              ifEntry64_t outOctets,
+              ifEntry64_t inUcastPkts,
+              ifEntry64_t outUcastPkts);
 void free_info(struct if_status_t *cell);
 
 #endif /* INFO_H */

@@ -4,16 +4,16 @@
 
 #include "perfdata.h"
 
-void perfdata_add_bytes(struct perfdata **root,
-                        char *name, size_t name_len,
-                        bytes_t value,
-                        bytes_t warn, bytes_t crit,
-                        bytes_t min, bytes_t max)
+void _int(uom_t uom, struct perfdata **root,
+                      char *name, size_t name_len,
+                      bytes_t value,
+                      bytes_t warn, bytes_t crit,
+                      bytes_t min, bytes_t max)
 {
     struct perfdata *_root = *root;
     struct perfdata *new = calloc(1, sizeof(struct perfdata));
 
-    new->uom = UOM_BYTES;
+    new->uom = uom;
     new->name_len = name_len;
     new->name = (char *)calloc(name_len + 1, sizeof(char));
     memcpy(new->name, name, name_len);
@@ -30,6 +30,24 @@ void perfdata_add_bytes(struct perfdata **root,
         _root->next = new;
 
     *root = new;
+}
+
+void perfdata_add_bytes(struct perfdata **root,
+                        char *name, size_t name_len,
+                        bytes_t value,
+                        bytes_t warn, bytes_t crit,
+                        bytes_t min, bytes_t max)
+{
+    _int(UOM_BYTES, root, name, name_len, value, warn, crit, min, max);
+}
+
+void perfdata_add_normal(struct perfdata **root,
+                         char *name, size_t name_len,
+                         bytes_t value,
+                         bytes_t warn, bytes_t crit,
+                         bytes_t min, bytes_t max)
+{
+    _int(UOM_NORMAL, root, name, name_len, value, warn, crit, min, max);
 }
 
 void perfdata_add_percent(struct perfdata **root,
@@ -82,6 +100,12 @@ void perfdata_print(struct perfdata *pf)
                    curr->percent.value,
                    curr->percent.warn, curr->percent.crit,
                    curr->percent.min, curr->percent.max);
+            break;
+        case UOM_NORMAL:
+            printf("'%s'=%lu;%lu;%lu;%lu;%lu", curr->name,
+                   curr->bytes.value,
+                   curr->bytes.warn, curr->bytes.crit,
+                   curr->bytes.min, curr->bytes.max);
             break;
         }
 

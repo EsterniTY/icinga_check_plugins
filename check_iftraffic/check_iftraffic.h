@@ -14,6 +14,20 @@
 #define IF_USAGE_ALIAS "Interface %s (alias %s) usage in: %.2f%%%s (%'lu bps), out: %.2f%%%s (%'lu bps)"
 #define MESSAGE_BUFER_SIZE 160
 
+#define CHECK_IDX if (idx >= _ifNumber) return idx
+
+#define IF_ALLOC(name, size) \
+    name = (size *)malloc(_ifNumber * sizeof(size)); \
+    if (!name) \
+        exit_error(EXIT_UNKNOWN, "Unable to allocate memory")
+
+#define IF_ALLOC_8(name) IF_ALLOC(name, ifEntry8_t)
+#define IF_ALLOC_32(name) IF_ALLOC(name, ifEntry32_t)
+#define IF_ALLOC_64(name) IF_ALLOC(name, ifEntry64_t)
+
+#define GET_COUNTER64() (((*vars->val.counter64).high << 32) + \
+    (*vars->val.counter64).low)
+
 extern struct opt_s {
     char *host;
     char *community;
@@ -32,9 +46,6 @@ extern struct host_settings_s {
     u_int8_t has_ifSpeed64;
 } host_settings;
 
-typedef u_int64_t ifEntry64_t;
-typedef u_int8_t ifEntry8_t;
-
 extern struct if_status_t if_status[];
 
 void parse_args(int argc, char *argv[]);
@@ -49,5 +60,12 @@ void add_msg(const struct if_status_t *item,
              const double in_p, const double out_p,
              const bytes_t in, const bytes_t out
              );
+
+static
+#ifndef DEBUG
+inline __attribute__((always_inline))
+#endif
+void iterate_oid(char *o, int num,
+                 size_t (*callback)(struct variable_list*, size_t idx));
 
 #endif /* CHECK_IFTRAFFIC_H */

@@ -143,6 +143,8 @@ static ifEntry64_t *_ifInOctets;
 static ifEntry64_t *_ifOutOctets;
 static ifEntry8_t  *_ifAdminState;
 static ifEntry8_t  *_ifOperState;
+static ifEntry64_t *_ifInUcastPkts;
+static ifEntry64_t *_ifOutUcastPkts;
 
 static struct if_status_t *info = NULL;
 static struct if_status_t *curr = NULL;
@@ -190,8 +192,7 @@ void add_msg(const struct if_status_t *item,
 
 size_t _li_alias_cc(struct variable_list *vars, size_t idx)
 {
-    if (idx >= _ifNumber)
-        return idx;
+    CHECK_IDX;
 
     _ifAlias[idx] = calloc(vars->val_len + 1, sizeof(char));
     _ifAlias_len[idx] = vars->val_len;
@@ -202,8 +203,7 @@ size_t _li_alias_cc(struct variable_list *vars, size_t idx)
 
 size_t _li_descr_cc(struct variable_list *vars, size_t idx)
 {
-    if (idx >= _ifNumber)
-        return idx;
+    CHECK_IDX;
 
     if (options.downstate == 0 &&
             (_ifOperState[idx] != IF_OPER_UP ||
@@ -276,7 +276,9 @@ size_t _li_descr_cc(struct variable_list *vars, size_t idx)
                  _ifOperState[idx],
                  _ifSpeed[idx],
                  _ifInOctets[idx],
-                 _ifOutOctets[idx]
+                 _ifOutOctets[idx],
+                 _ifInUcastPkts[idx],
+                 _ifOutUcastPkts[idx]
                  );
 
         if (!info)
@@ -290,8 +292,7 @@ size_t _li_descr_cc(struct variable_list *vars, size_t idx)
 
 size_t _li_speed_cc(struct variable_list *vars, size_t idx)
 {
-    if (idx >= _ifNumber)
-        return idx;
+    CHECK_IDX;
 
     _ifSpeed[idx] = (u_int64_t)(*vars->val.integer * IF_SPEED_1MB);
 
@@ -300,30 +301,43 @@ size_t _li_speed_cc(struct variable_list *vars, size_t idx)
 
 size_t _li_in_octets_cc(struct variable_list *vars, size_t idx)
 {
-    if (idx >= _ifNumber)
-        return idx;
+    CHECK_IDX;
 
-    _ifInOctets[idx] = ((*vars->val.counter64).high << 32) +
-            (*vars->val.counter64).low;
+    _ifInOctets[idx] = GET_COUNTER64();
+
+    return ++idx;
+}
+
+size_t _li_in_ucast_cc(struct variable_list *vars, size_t idx)
+{
+    CHECK_IDX;
+
+    _ifInUcastPkts[idx] = GET_COUNTER64();
+
+    return ++idx;
+}
+
+size_t _li_out_ucast_cc(struct variable_list *vars, size_t idx)
+{
+    CHECK_IDX;
+
+    _ifOutUcastPkts[idx] = GET_COUNTER64();
 
     return ++idx;
 }
 
 size_t _li_out_octets_cc(struct variable_list *vars, size_t idx)
 {
-    if (idx >= _ifNumber)
-        return idx;
+    CHECK_IDX;
 
-    _ifOutOctets[idx] = ((*vars->val.counter64).high << 32) +
-            (*vars->val.counter64).low;
+    _ifOutOctets[idx] = GET_COUNTER64();
 
     return ++idx;
 }
 
 size_t _li_adm_state_cc(struct variable_list *vars, size_t idx)
 {
-    if (idx >= _ifNumber)
-        return idx;
+    CHECK_IDX;
 
     _ifAdminState[idx] = *vars->val.integer & 0xFF;
 
@@ -332,8 +346,7 @@ size_t _li_adm_state_cc(struct variable_list *vars, size_t idx)
 
 size_t _li_opr_state_cc(struct variable_list *vars, size_t idx)
 {
-    if (idx >= _ifNumber)
-        return idx;
+    CHECK_IDX;
 
     _ifOperState[idx] = *vars->val.integer & 0xFF;
 
@@ -366,67 +379,32 @@ struct if_status_t *load_snmp_info(void)
 {
     _ifNumber = ifNumber();
 
-    _ifAlias = (char **)calloc(_ifNumber, sizeof(char *));
-    if (!_ifAlias)
-        exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifAlias)");
+    IF_ALLOC(_ifAlias, char *);
+    IF_ALLOC(_ifAlias_len, size_t);
+    IF_ALLOC_64(_ifSpeed);
+    IF_ALLOC_64(_ifInOctets);
+    IF_ALLOC_64(_ifOutOctets);
+    IF_ALLOC_64(_ifInUcastPkts);
+    IF_ALLOC_64(_ifOutUcastPkts);
+    IF_ALLOC_8(_ifAdminState);
+    IF_ALLOC_8(_ifOperState);
 
-    _ifAlias_len = (size_t *)malloc(_ifNumber * sizeof(size_t));
-    if (!_ifAlias_len)
-        exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifAlias_len)");
-
-    _ifSpeed = (ifEntry64_t *)calloc(_ifNumber, sizeof(ifEntry64_t));
-    if (!_ifSpeed)
-        exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifSpeed)");
-
-    _ifInOctets = (ifEntry64_t *)calloc(_ifNumber, sizeof(ifEntry64_t));
-    if (!_ifInOctets)
-        exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifInOctets)");
-
-    _ifOutOctets = (ifEntry64_t *)calloc(_ifNumber, sizeof(ifEntry64_t));
-    if (!_ifOutOctets)
-        exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifOutOctets)");
-
-    _ifAdminState = (ifEntry8_t *)calloc(_ifNumber, sizeof(ifEntry8_t));
-    if (!_ifAdminState)
-        exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifAdminState)");
-
-    _ifOperState = (ifEntry8_t *)calloc(_ifNumber, sizeof(ifEntry8_t));
-    if (!_ifOperState)
-        exit_error(EXIT_UNKNOWN, "Unable to allocate memory (ifOperState)");
-
-
-    oid oid_ifAlias[] = { 1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 18 };
-    iterate_vars(oid_ifAlias, OID_LENGTH(oid_ifAlias), 10,
-                 _li_alias_cc, NULL);
-
-    oid oid_ifHighSpeed[] = { 1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 15 };
-    iterate_vars(oid_ifHighSpeed, OID_LENGTH(oid_ifHighSpeed), 50,
-                 _li_speed_cc, NULL);
-
-    oid oid_ifHCInOctets[] = { 1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 6 };
-    iterate_vars(oid_ifHCInOctets, OID_LENGTH(oid_ifHCInOctets), 50,
-                 _li_in_octets_cc, NULL);
-
-    oid oid_ifHCOutOctets[] = { 1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 10 };
-    iterate_vars(oid_ifHCOutOctets, OID_LENGTH(oid_ifHCOutOctets), 50,
-                 _li_out_octets_cc, NULL);
-
-    oid oid_ifAdminState[] = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 7 };
-    iterate_vars(oid_ifAdminState, OID_LENGTH(oid_ifAdminState), 50,
-                 _li_adm_state_cc, NULL);
-
-    oid oid_ifOperState[] = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 8 };
-    iterate_vars(oid_ifOperState, OID_LENGTH(oid_ifOperState), 50,
-                 _li_opr_state_cc, NULL);
-
-    oid oid_ifDescr[] = { 1, 3, 6, 1, 2, 1, 31, 1, 1, 1, 1 };
-    iterate_vars(oid_ifDescr, OID_LENGTH(oid_ifDescr), 10,
-                 _li_descr_cc, NULL);
+    iterate_oid(".1.3.6.1.2.1.31.1.1.1.18", 10, _li_alias_cc);
+    iterate_oid(".1.3.6.1.2.1.31.1.1.1.15", 50, _li_speed_cc);
+    iterate_oid(".1.3.6.1.2.1.31.1.1.1.6", 50, _li_in_octets_cc);
+    iterate_oid(".1.3.6.1.2.1.31.1.1.1.10", 50, _li_out_octets_cc);
+    iterate_oid(".1.3.6.1.2.1.31.1.1.1.7", 50, _li_in_ucast_cc);
+    iterate_oid(".1.3.6.1.2.1.31.1.1.1.11", 50, _li_out_ucast_cc);
+    iterate_oid(".1.3.6.1.2.1.2.2.1.7", 50, _li_adm_state_cc);
+    iterate_oid(".1.3.6.1.2.1.2.2.1.8", 50, _li_opr_state_cc);
+    iterate_oid(".1.3.6.1.2.1.31.1.1.1.1", 10, _li_descr_cc);
 
     free(_ifOperState);
     free(_ifAdminState);
     free(_ifOutOctets);
     free(_ifInOctets);
+    free(_ifInUcastPkts);
+    free(_ifOutUcastPkts);
     free(_ifSpeed);
     free(_ifAlias_len);
 
@@ -517,4 +495,18 @@ size_t str_format(char **result, const char *subject,
     free(_result);
 
     return new_size;
+}
+
+void iterate_oid(char *o, int num,
+                 size_t (*callback)(struct variable_list *, size_t))
+{
+    size_t o_len = MAX_OID_LEN;
+    oid o_oid[MAX_OID_LEN];
+
+    if (!snmp_parse_oid(o, o_oid, &o_len)) {
+        SOCK_CLEANUP;
+        exit_error(EXIT_UNKNOWN, o);
+    }
+
+    iterate_vars(o_oid, o_len, num, callback, NULL);
 }
