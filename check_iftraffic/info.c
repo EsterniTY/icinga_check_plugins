@@ -37,8 +37,8 @@ void add_info(struct if_status_t **root,
               ifEntry64_t speed,
               ifEntry64_t inOctets,
               ifEntry64_t outOctets,
-              ifEntry32_t inUcastPkts,
-              ifEntry32_t outUcastPkts)
+              ifEntry64_t inUcastPkts,
+              ifEntry64_t outUcastPkts)
 {
     struct if_status_t *new;
     struct if_status_t *_root = *root;
