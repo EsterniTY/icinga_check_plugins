@@ -91,6 +91,8 @@ struct if_status_t *read_info()
         len += fr(&curr->speed, sizeof(curr->speed), fp);
         len += fr(&curr->inOctets, sizeof(curr->inOctets), fp);
         len += fr(&curr->outOctets, sizeof(curr->outOctets), fp);
+        len += fr(&curr->inUcastPkts, sizeof(curr->inUcastPkts), fp);
+        len += fr(&curr->outUcastPkts, sizeof(curr->outUcastPkts), fp);
         len += fr(&curr->operState, sizeof(curr->operState), fp);
         len += fr(&curr->adminState, sizeof(curr->adminState), fp);
         len += fr(&curr->name_len, sizeof(curr->name_len), fp);
@@ -151,6 +153,8 @@ void write_info(struct if_status_t *info)
         len += fw(&curr->speed, sizeof(curr->speed), fp);
         len += fw(&curr->inOctets, sizeof(curr->inOctets), fp);
         len += fw(&curr->outOctets, sizeof(curr->outOctets), fp);
+        len += fw(&curr->inUcastPkts, sizeof(curr->inUcastPkts), fp);
+        len += fw(&curr->outUcastPkts, sizeof(curr->outUcastPkts), fp);
         len += fw(&curr->adminState, sizeof(curr->adminState), fp);
         len += fw(&curr->operState, sizeof(curr->operState), fp);
         len += fw(&curr->name_len, sizeof(curr->name_len), fp);
