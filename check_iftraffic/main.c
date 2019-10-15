@@ -74,6 +74,8 @@ int main(int argc, char *argv[])
     while (new) {
         bytes_t inDelta = 0;
         bytes_t outDelta = 0;
+        bytes_t inPpsDelta = 0;
+        bytes_t outPpsDelta = 0;
         mtime_t timeDelta = 1;
 
         if (old_info) {
@@ -82,6 +84,8 @@ int main(int argc, char *argv[])
                 if (old->id == new->id) {
                     inDelta = octet_delta(old->inOctets, new->inOctets) * 8;
                     outDelta = octet_delta(old->outOctets, new->outOctets) * 8;
+                    inPpsDelta = octet_delta(old->inUcastPkts, new->inUcastPkts);
+                    outPpsDelta = octet_delta(old->outUcastPkts, new->outUcastPkts);
                     timeDelta = (new->microtime - old->microtime) / 1000;
                     break;
                 }
@@ -95,6 +99,8 @@ int main(int argc, char *argv[])
 
         bytes_t in_bps;
         bytes_t out_bps;
+        bytes_t in_pps;
+        bytes_t out_pps;
         bytes_t warn;
         bytes_t crit;
         bytes_t speed = options.speed ? options.speed : new->speed;
@@ -104,6 +110,8 @@ int main(int argc, char *argv[])
 
         in_bps = timeDelta  ? inDelta / timeDelta : 0;
         out_bps = timeDelta ? outDelta / timeDelta : 0;
+        in_pps = timeDelta ? inPpsDelta / timeDelta : 0;
+        out_pps = timeDelta ? outPpsDelta / timeDelta : 0;
 
         warn = options.warn * (speed / 100);
         crit = options.crit * (speed / 100);
@@ -136,6 +144,14 @@ int main(int argc, char *argv[])
         perfdata_add_percent(&pf_curr, pf_name, (size_t) pf_len,
                              in_percent, options.warn, options.crit,
                              0, 100);
+
+        pf_len = snprintf(pf_name, 40, "%s_packets_in", new->name);
+        perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
+                           in_pps, 0, 0, 0, 0);
+
+        pf_len = snprintf(pf_name, 40, "%s_packets_out", new->name);
+        perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
+                           out_pps, 0, 0, 0, 0);
 
         if (options.crit > 0 &&
                 (out_percent >= options.crit
