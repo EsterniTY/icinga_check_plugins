@@ -33,7 +33,9 @@ void add_info(struct if_status_t **root,
               ifEntry8_t operState,
               ifEntry64_t speed,
               ifEntry64_t inOctets,
-              ifEntry64_t outOctets);
+              ifEntry64_t outOctets,
+              ifEntry32_t inUcastPkts,
+              ifEntry32_t outUcastPkts);
 void free_info(struct if_status_t *cell);
 
 #endif /* INFO_H */

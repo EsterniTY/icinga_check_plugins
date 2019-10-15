@@ -19,6 +19,8 @@ struct if_status_t {
     ifEntry64_t speed;     // 8
     ifEntry64_t inOctets;  // 8
     ifEntry64_t outOctets; // 8
+    ifEntry32_t inUcastPkts;  // 4
+    ifEntry32_t outUcastPkts; // 4
     ifEntry8_t adminState; // 1
     ifEntry8_t operState;  // 1
     size_t name_len;     // 8

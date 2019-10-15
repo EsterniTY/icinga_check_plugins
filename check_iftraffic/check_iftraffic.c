@@ -143,6 +143,8 @@ static ifEntry64_t *_ifInOctets;
 static ifEntry64_t *_ifOutOctets;
 static ifEntry8_t  *_ifAdminState;
 static ifEntry8_t  *_ifOperState;
+static ifEntry32_t *_ifInUcastPkts;
+static ifEntry32_t *_ifOutUcastPkts;
 
 static struct if_status_t *info = NULL;
 static struct if_status_t *curr = NULL;
@@ -274,7 +276,9 @@ size_t _li_descr_cc(struct variable_list *vars, size_t idx)
                  _ifOperState[idx],
                  _ifSpeed[idx],
                  _ifInOctets[idx],
-                 _ifOutOctets[idx]
+                 _ifOutOctets[idx],
+                 _ifInUcastPkts[idx],
+                 _ifOutUcastPkts[idx]
                  );
 
         if (!info)
@@ -301,6 +305,24 @@ size_t _li_in_octets_cc(struct variable_list *vars, size_t idx)
 
     _ifInOctets[idx] = ((*vars->val.counter64).high << 32) +
             (*vars->val.counter64).low;
+
+    return ++idx;
+}
+
+size_t _li_in_ucast_cc(struct variable_list *vars, size_t idx)
+{
+    CHECK_IDX;
+
+    _ifInUcastPkts[idx] = (ifEntry32_t)*vars->val.integer;
+
+    return ++idx;
+}
+
+size_t _li_out_ucast_cc(struct variable_list *vars, size_t idx)
+{
+    CHECK_IDX;
+
+    _ifOutUcastPkts[idx] = (ifEntry32_t)*vars->val.integer;
 
     return ++idx;
 }
@@ -364,6 +386,8 @@ struct if_status_t *load_snmp_info(void)
     IF_ALLOC_64(_ifSpeed);
     IF_ALLOC_64(_ifInOctets);
     IF_ALLOC_64(_ifOutOctets);
+    IF_ALLOC_32(_ifInUcastPkts);
+    IF_ALLOC_32(_ifOutUcastPkts);
     IF_ALLOC_8(_ifAdminState);
     IF_ALLOC_8(_ifOperState);
 
@@ -371,6 +395,8 @@ struct if_status_t *load_snmp_info(void)
     iterate_oid(".1.3.6.1.2.1.31.1.1.1.15", 50, _li_speed_cc);
     iterate_oid(".1.3.6.1.2.1.31.1.1.1.6", 50, _li_in_octets_cc);
     iterate_oid(".1.3.6.1.2.1.31.1.1.1.10", 50, _li_out_octets_cc);
+    iterate_oid(".1.3.6.1.2.1.2.2.1.11", 50, _li_in_ucast_cc);
+    iterate_oid(".1.3.6.1.2.1.2.2.1.17", 50, _li_out_ucast_cc);
     iterate_oid(".1.3.6.1.2.1.2.2.1.7", 50, _li_adm_state_cc);
     iterate_oid(".1.3.6.1.2.1.2.2.1.8", 50, _li_opr_state_cc);
     iterate_oid(".1.3.6.1.2.1.31.1.1.1.1", 10, _li_descr_cc);
@@ -379,6 +405,8 @@ struct if_status_t *load_snmp_info(void)
     free(_ifAdminState);
     free(_ifOutOctets);
     free(_ifInOctets);
+    free(_ifInUcastPkts);
+    free(_ifOutUcastPkts);
     free(_ifSpeed);
     free(_ifAlias_len);
 

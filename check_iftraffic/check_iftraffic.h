@@ -22,6 +22,7 @@
         exit_error(EXIT_UNKNOWN, "Unable to allocate memory")
 
 #define IF_ALLOC_8(name) IF_ALLOC(name, ifEntry8_t)
+#define IF_ALLOC_32(name) IF_ALLOC(name, ifEntry32_t)
 #define IF_ALLOC_64(name) IF_ALLOC(name, ifEntry64_t)
 
 extern struct opt_s {
