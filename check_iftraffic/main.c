@@ -56,7 +56,8 @@ int main(int argc, char *argv[])
     print_info_table(old_info);
     spacer("Delta");
     printf(format1, "oid", "ifName", "Speed", "deltaTime (s)",
-           "inDelta (B)", "outDelta (B)", "in bps", "out bps");
+           "inDelta (B)", "outDelta (B)", "in bps", "out bps",
+           "in pps", "out pps");
 #endif
 
     struct if_status_t *new = NULL;
@@ -170,7 +171,7 @@ int main(int argc, char *argv[])
 #ifdef DEBUG
         print_delta_row(new->id, new->name, speed,
                         timeDelta, inDelta, outDelta,
-                        in_bps, out_bps);
+                        in_bps, out_bps, in_pps, out_pps);
 #endif
 
         new = new->next;
