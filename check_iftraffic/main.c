@@ -49,6 +49,16 @@ int main(int argc, char *argv[])
         exit_error(EXIT_UNKNOWN, "Collecting data");
     }
 
+    if ((old_info->microtime / 1000) == (new_info->microtime / 1000)) {
+        free_info(old_info);
+        free_info(new_info);
+
+        free(options.cache_path);
+
+        exit_error(EXIT_UNKNOWN, "No time delta since last run. "
+                   "Wait at least one second");
+    }
+
 #ifdef DEBUG
     spacer("New Info");
     print_info_table(new_info);
