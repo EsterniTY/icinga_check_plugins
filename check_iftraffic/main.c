@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
         if (old_info) {
             old = old_info;
             while (old) {
-                if (strcmp(new->name, old->name) == 0) {
+                if (old->id == new->id) {
                     inDelta = octet_delta(old->inOctets, new->inOctets) * 8;
                     outDelta = octet_delta(old->outOctets, new->outOctets) * 8;
                     timeDelta = (new->microtime - old->microtime) / 1000;
