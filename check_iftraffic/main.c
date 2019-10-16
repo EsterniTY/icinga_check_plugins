@@ -36,6 +36,13 @@ int main(int argc, char *argv[])
 
     options.version = try_session(options.host, options.community,
                                   options.version);
+
+    host_settings.uptime = get_host_uptime();
+
+#ifdef DEBUG
+    printf("Uptime: >%u<\n", host_settings.uptime);
+#endif
+
     new_info = load_snmp_info();
     close_session();
 

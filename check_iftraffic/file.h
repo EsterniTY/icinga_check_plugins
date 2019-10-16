@@ -4,7 +4,7 @@
 #include "if_status.h"
 
 #define header_id      "ITF"
-#define header_version 5
+#define header_version 6
 #define header_align   1
 
 #define HEADER_FLAG_ALIGN     0x01
@@ -18,6 +18,7 @@ struct header_t {
     u_int16_t records;
     u_int64_t flags;
     char      __z2[2];
+    u_int     uptime;
 };
 
 void write_info(struct if_status_t *info);
