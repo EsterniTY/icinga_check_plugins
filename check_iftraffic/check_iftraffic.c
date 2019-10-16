@@ -19,6 +19,20 @@
 extern const char *__progname;
 static const char *__version = "1.0";
 
+static size_t        _ifNumber = 0;
+static char        **_ifAlias;
+static size_t       *_ifAlias_len;
+static ifEntry64_t  *_ifSpeed;
+static ifEntry64_t  *_ifInOctets;
+static ifEntry64_t  *_ifOutOctets;
+static ifEntry8_t   *_ifAdminState;
+static ifEntry8_t   *_ifOperState;
+static ifEntry64_t  *_ifInUcastPkts;
+static ifEntry64_t  *_ifOutUcastPkts;
+
+static struct if_status_t *info = NULL;
+static struct if_status_t *curr = NULL;
+
 void parse_args(int argc, char *argv[])
 {
     int opt;
@@ -134,20 +148,6 @@ void print_help()
     puts("\t-t    Cache directory (/tmp/mt if ommited)");
     puts("\t-h    Show this help");
 }
-
-static size_t _ifNumber = 0;
-static char **_ifAlias;
-static size_t *_ifAlias_len;
-static ifEntry64_t *_ifSpeed;
-static ifEntry64_t *_ifInOctets;
-static ifEntry64_t *_ifOutOctets;
-static ifEntry8_t  *_ifAdminState;
-static ifEntry8_t  *_ifOperState;
-static ifEntry64_t *_ifInUcastPkts;
-static ifEntry64_t *_ifOutUcastPkts;
-
-static struct if_status_t *info = NULL;
-static struct if_status_t *curr = NULL;
 
 void add_msg(const struct if_status_t *item,
              char ***stack, const size_t count,
@@ -389,15 +389,15 @@ struct if_status_t *load_snmp_info(void)
     IF_ALLOC_8(_ifAdminState);
     IF_ALLOC_8(_ifOperState);
 
-    iterate_oid(".1.3.6.1.2.1.31.1.1.1.18", 10, _li_alias_cc);
-    iterate_oid(".1.3.6.1.2.1.31.1.1.1.15", 50, _li_speed_cc);
-    iterate_oid(".1.3.6.1.2.1.31.1.1.1.6", 50, _li_in_octets_cc);
-    iterate_oid(".1.3.6.1.2.1.31.1.1.1.10", 50, _li_out_octets_cc);
-    iterate_oid(".1.3.6.1.2.1.31.1.1.1.7", 50, _li_in_ucast_cc);
-    iterate_oid(".1.3.6.1.2.1.31.1.1.1.11", 50, _li_out_ucast_cc);
-    iterate_oid(".1.3.6.1.2.1.2.2.1.7", 50, _li_adm_state_cc);
-    iterate_oid(".1.3.6.1.2.1.2.2.1.8", 50, _li_opr_state_cc);
-    iterate_oid(".1.3.6.1.2.1.31.1.1.1.1", 10, _li_descr_cc);
+    iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,18}, 11, 10, _li_alias_cc);
+    iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,15}, 11, 50, _li_speed_cc);
+    iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,6 }, 11, 50, _li_in_octets_cc);
+    iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,10}, 11, 50, _li_out_octets_cc);
+    iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,7 }, 11, 50, _li_in_ucast_cc);
+    iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,11}, 11, 50, _li_out_ucast_cc);
+    iterate_vars((oid[]){1,3,6,1,2,1,2 ,2,1,7   }, 10, 50, _li_adm_state_cc);
+    iterate_vars((oid[]){1,3,6,1,2,1,2 ,2,1,8   }, 10, 50, _li_opr_state_cc);
+    iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,1 }, 11, 10, _li_descr_cc);
 
     free(_ifOperState);
     free(_ifAdminState);
@@ -495,18 +495,4 @@ size_t str_format(char **result, const char *subject,
     free(_result);
 
     return new_size;
-}
-
-void iterate_oid(char *o, int num,
-                 size_t (*callback)(struct variable_list *, size_t))
-{
-    size_t o_len = MAX_OID_LEN;
-    oid o_oid[MAX_OID_LEN];
-
-    if (!snmp_parse_oid(o, o_oid, &o_len)) {
-        SOCK_CLEANUP;
-        exit_error(EXIT_UNKNOWN, o);
-    }
-
-    iterate_vars(o_oid, o_len, num, callback, NULL);
 }

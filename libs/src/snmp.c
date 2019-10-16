@@ -156,8 +156,7 @@ long errstat()
 }
 
 void iterate_vars(oid *root, size_t root_length, long repetitions,
-                  size_t (*cc)(struct variable_list*, size_t idx),
-                  int (*ch)(int, struct snmp_pdu*))
+                  size_t (*cc)(struct variable_list*, size_t idx))
 {
     u_int8_t can_go_next = 1;
     size_t idx = 0;
@@ -186,19 +185,14 @@ void iterate_vars(oid *root, size_t root_length, long repetitions,
         snmp_add_null_var(pdu, name, name_len);
         status = snmp_synch_response(ss, pdu, &response);
 
-        if (ch == NULL) {
-            if (status != STAT_SUCCESS) {
-                snmp_free_pdu(response);
-                exit_error(EXIT_CRITICAL, (status == STAT_ERROR
-                                           ? "SNMP response error"
-                                           : "SNMP response timedout"));
-            }
+        if (status != STAT_SUCCESS) {
+            snmp_free_pdu(response);
+            exit_error(EXIT_CRITICAL, (status == STAT_ERROR
+                                       ? "SNMP response error"
+                                       : "SNMP response timedout"));
+        }
 
-            if (response->errstat != SNMP_ERR_NOERROR) {
-                snmp_free_pdu(response);
-                return;
-            }
-        } else if (ch(status, response) != 0) {
+        if (response->errstat != SNMP_ERR_NOERROR) {
             snmp_free_pdu(response);
             return;
         }

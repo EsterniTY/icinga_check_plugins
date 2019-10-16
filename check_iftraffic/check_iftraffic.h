@@ -61,11 +61,4 @@ void add_msg(const struct if_status_t *item,
              const bytes_t in, const bytes_t out
              );
 
-static
-#ifndef DEBUG
-inline __attribute__((always_inline))
-#endif
-void iterate_oid(char *o, int num,
-                 size_t (*callback)(struct variable_list*, size_t idx));
-
 #endif /* CHECK_IFTRAFFIC_H */
