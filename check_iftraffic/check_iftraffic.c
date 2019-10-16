@@ -496,3 +496,24 @@ size_t str_format(char **result, const char *subject,
 
     return new_size;
 }
+
+u_int get_host_uptime()
+{
+    oid                   root[]      = {1,3,6,1,2,1,1,3,0};
+    size_t                root_length = OID_LENGTH(root);
+    struct snmp_pdu      *response;
+    struct variable_list *vars;
+    u_int                 uptime      = 0;
+
+    get_pdu(root, root_length, &response);
+    check_response_errstat(response);
+
+    vars = response->variables;
+
+    if (vars->type == ASN_TIMETICKS)
+        uptime = (u_int)(*vars->val.integer);
+
+    snmp_free_pdu(response);
+
+    return uptime;
+}

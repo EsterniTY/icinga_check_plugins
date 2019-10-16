@@ -61,4 +61,5 @@ void add_msg(const struct if_status_t *item,
              const bytes_t in, const bytes_t out
              );
 
+u_int get_host_uptime();
 #endif /* CHECK_IFTRAFFIC_H */
