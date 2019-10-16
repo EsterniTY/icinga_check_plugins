@@ -17,10 +17,10 @@ long try_session(char *host, char *community, long version)
     init_session(host, community, version);
 
     if (version != SNMP_VERSION_1) {
-        oid theOid[] = { 1, 3, 6, 1, 2, 1, 1, 1 };
+        oid              theOid[] = { 1, 3, 6, 1, 2, 1, 1, 1, 0 };
         struct snmp_pdu *response;
         struct snmp_pdu *pdu;
-        int status;
+        int              status;
 
         pdu = snmp_pdu_create(SNMP_MSG_GET);
         snmp_add_null_var(pdu, theOid, OID_LENGTH(theOid));
