@@ -44,6 +44,7 @@ extern struct opt_s {
 
 extern struct host_settings_s {
     u_int8_t has_ifSpeed64;
+    u_int    uptime;
 } host_settings;
 
 extern struct if_status_t if_status[];
@@ -61,11 +62,5 @@ void add_msg(const struct if_status_t *item,
              const bytes_t in, const bytes_t out
              );
 
-static
-#ifndef DEBUG
-inline __attribute__((always_inline))
-#endif
-void iterate_oid(char *o, int num,
-                 size_t (*callback)(struct variable_list*, size_t idx));
-
+u_int get_host_uptime();
 #endif /* CHECK_IFTRAFFIC_H */

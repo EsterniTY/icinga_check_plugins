@@ -23,28 +23,35 @@ int main(int argc, char *argv[])
 
     host_settings.has_ifSpeed64 = 1;
 
+#ifdef DEBUG
+    printf("Host: >%s<\n", options.host);
+    printf("Filter: >%s<\nPattern: >%s<\n", options.filter, options.pattern);
+#endif
+
     // Needed for pretty messages
     setlocale(LC_NUMERIC, "");
 
     struct if_status_t *old_info = NULL;
     struct if_status_t *new_info = NULL;
 
-    old_info = read_info();
-
     options.version = try_session(options.host, options.community,
                                   options.version);
+
+    host_settings.uptime = get_host_uptime();
+
+#ifdef DEBUG
+    printf("Uptime: >%u<\n", host_settings.uptime);
+#endif
+
     new_info = load_snmp_info();
     close_session();
 
-#ifdef DEBUG
-    printf("Host: >%s<\n", options.host);
-    printf("Filter: >%s<\nPattern: >%s<\n", options.filter, options.pattern);
-#endif
-
-    write_info(new_info);
+    old_info = read_info();
 
     if (old_info == NULL) {
+        write_info(new_info);
         free_info(new_info);
+        free(options.cache_path);
 
         exit_error(EXIT_UNKNOWN, "Collecting data");
     }
@@ -52,12 +59,13 @@ int main(int argc, char *argv[])
     if ((old_info->microtime / 1000) == (new_info->microtime / 1000)) {
         free_info(old_info);
         free_info(new_info);
-
         free(options.cache_path);
 
         exit_error(EXIT_UNKNOWN, "No time delta since last run. "
                    "Wait at least one second");
     }
+
+    write_info(new_info);
 
 #ifdef DEBUG
     spacer("New Info");

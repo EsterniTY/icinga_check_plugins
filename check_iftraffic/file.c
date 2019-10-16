@@ -27,6 +27,7 @@ void write_header(FILE *fp, u_int16_t records)
     memcpy(header->id, header_id, sizeof(header->id));
     header->version = header_version;
     header->records = records;
+    header->uptime = host_settings.uptime;
 
     header->flags = 0;
     if (header_align)
@@ -63,8 +64,14 @@ struct if_status_t *read_info()
 
     if (strcmp(header_id, header.id) != 0 ||
             header.version != header_version) {
+        fclose(fp);
         remove(options.cache_path);
+        return NULL;
+    }
 
+    if (header.uptime > host_settings.uptime) {
+        fclose(fp);
+        remove(options.cache_path);
         return NULL;
     }
 

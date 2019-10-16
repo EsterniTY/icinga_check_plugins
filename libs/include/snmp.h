@@ -31,7 +31,6 @@ void set_response_errstat_exit(u_int8_t status);
 void check_response_errstat(struct snmp_pdu *response);
 long errstat(void);
 void iterate_vars(oid *root, size_t root_length, long repetitions,
-                  size_t (*cc)(struct variable_list*, size_t idx),
-                  int (*ch)(int, struct snmp_pdu*));
+                  size_t (*cc)(struct variable_list*, size_t idx));
 
 #endif /* CHECK_LIBS_SNMP_H */
