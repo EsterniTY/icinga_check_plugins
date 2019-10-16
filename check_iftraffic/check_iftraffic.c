@@ -354,21 +354,15 @@ size_t _li_opr_state_cc(struct variable_list *vars, size_t idx)
 }
 
 size_t ifNumber(void) {
-    oid theOid[] = { 1, 3, 6, 1, 2, 1, 2, 1, 0 };
-
+    oid              theOid[] = {1,3,6,1,2,1,2,1,0};
     struct snmp_pdu *response;
-    size_t value = 0;
-    int status = 0;
+    size_t           value    = 0;
 
-    status = get_pdu(theOid, OID_LENGTH(theOid), &response);
-
+    get_pdu(theOid, OID_LENGTH(theOid), &response);
     check_response_errstat(response);
 
-    switch (response->variables->type) {
-    case ASN_INTEGER:
+    if (response->variables->type == ASN_INTEGER)
         value = *response->variables->val.integer & 0xFFFFFFFF;
-        break;
-    }
 
     snmp_free_pdu(response);
 
@@ -499,21 +493,17 @@ size_t str_format(char **result, const char *subject,
 
 u_int get_host_uptime()
 {
-    oid                   root[]      = {1,3,6,1,2,1,1,3,0};
-    size_t                root_length = OID_LENGTH(root);
-    struct snmp_pdu      *response;
-    struct variable_list *vars;
-    u_int                 uptime      = 0;
+    oid              theOid[]  = {1,3,6,1,2,1,1,3,0};
+    struct snmp_pdu *response;
+    u_int            value     = 0;
 
-    get_pdu(root, root_length, &response);
+    get_pdu(theOid, OID_LENGTH(theOid), &response);
     check_response_errstat(response);
 
-    vars = response->variables;
-
-    if (vars->type == ASN_TIMETICKS)
-        uptime = (u_int)(*vars->val.integer);
+    if (response->variables->type == ASN_TIMETICKS)
+        value = (u_int) *response->variables->val.integer;
 
     snmp_free_pdu(response);
 
-    return uptime;
+    return value;
 }
