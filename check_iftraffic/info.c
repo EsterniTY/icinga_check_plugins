@@ -38,7 +38,9 @@ void add_info(struct if_status_t **root,
               ifEntry64_t inOctets,
               ifEntry64_t outOctets,
               ifEntry64_t inUcastPkts,
-              ifEntry64_t outUcastPkts)
+              ifEntry64_t outUcastPkts,
+              ifEntry32_t inErrors,
+              ifEntry32_t outErrors)
 {
     struct if_status_t *new;
     struct if_status_t *_root = *root;
@@ -58,6 +60,8 @@ void add_info(struct if_status_t **root,
     new->outOctets = outOctets;
     new->inUcastPkts = inUcastPkts;
     new->outUcastPkts = outUcastPkts;
+    new->inErrors = inErrors;
+    new->outErrors = outErrors;
     new->adminState = adminState;
     new->operState = operState;
     new->id = id;

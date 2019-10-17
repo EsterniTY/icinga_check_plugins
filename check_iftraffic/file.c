@@ -93,18 +93,20 @@ struct if_status_t *read_info()
         curr = malloc(sizeof(struct if_status_t));
         int len = 0;
 
-        len += fr(&curr->microtime, sizeof(curr->microtime), fp);
-        len += fr(&curr->id, sizeof(curr->id), fp);
-        len += fr(&curr->speed, sizeof(curr->speed), fp);
-        len += fr(&curr->inOctets, sizeof(curr->inOctets), fp);
-        len += fr(&curr->outOctets, sizeof(curr->outOctets), fp);
-        len += fr(&curr->inUcastPkts, sizeof(curr->inUcastPkts), fp);
+        len += fr(&curr->microtime,    sizeof(curr->microtime),    fp);
+        len += fr(&curr->id,           sizeof(curr->id),           fp);
+        len += fr(&curr->speed,        sizeof(curr->speed),        fp);
+        len += fr(&curr->inOctets,     sizeof(curr->inOctets),     fp);
+        len += fr(&curr->outOctets,    sizeof(curr->outOctets),    fp);
+        len += fr(&curr->inUcastPkts,  sizeof(curr->inUcastPkts),  fp);
         len += fr(&curr->outUcastPkts, sizeof(curr->outUcastPkts), fp);
-        len += fr(&curr->operState, sizeof(curr->operState), fp);
-        len += fr(&curr->adminState, sizeof(curr->adminState), fp);
-        len += fr(&curr->name_len, sizeof(curr->name_len), fp);
+        len += fr(&curr->inErrors,     sizeof(curr->inErrors),     fp);
+        len += fr(&curr->outErrors,    sizeof(curr->outErrors),    fp);
+        len += fr(&curr->operState,    sizeof(curr->operState),    fp);
+        len += fr(&curr->adminState,   sizeof(curr->adminState),   fp);
+        len += fr(&curr->name_len,     sizeof(curr->name_len),     fp);
         curr->name = (char *)calloc(curr->name_len + 1, sizeof(char));
-        len += fr(curr->name, curr->name_len, fp);
+        len += fr(curr->name,          curr->name_len,             fp);
         curr->alias = NULL;
 
         curr->next = NULL;
@@ -155,17 +157,19 @@ void write_info(struct if_status_t *info)
 
     while(curr != NULL) {
         size_t len = 0;
-        len += fw(&curr->microtime, sizeof (curr->microtime), fp);
-        len += fw(&curr->id, sizeof(curr->id), fp);
-        len += fw(&curr->speed, sizeof(curr->speed), fp);
-        len += fw(&curr->inOctets, sizeof(curr->inOctets), fp);
-        len += fw(&curr->outOctets, sizeof(curr->outOctets), fp);
-        len += fw(&curr->inUcastPkts, sizeof(curr->inUcastPkts), fp);
+        len += fw(&curr->microtime,    sizeof(curr->microtime),    fp);
+        len += fw(&curr->id,           sizeof(curr->id),           fp);
+        len += fw(&curr->speed,        sizeof(curr->speed),        fp);
+        len += fw(&curr->inOctets,     sizeof(curr->inOctets),     fp);
+        len += fw(&curr->outOctets,    sizeof(curr->outOctets),    fp);
+        len += fw(&curr->inUcastPkts,  sizeof(curr->inUcastPkts),  fp);
         len += fw(&curr->outUcastPkts, sizeof(curr->outUcastPkts), fp);
-        len += fw(&curr->adminState, sizeof(curr->adminState), fp);
-        len += fw(&curr->operState, sizeof(curr->operState), fp);
-        len += fw(&curr->name_len, sizeof(curr->name_len), fp);
-        len += fw(curr->name, curr->name_len, fp);
+        len += fw(&curr->inErrors,     sizeof(curr->inErrors),     fp);
+        len += fw(&curr->outErrors,    sizeof(curr->outErrors),    fp);
+        len += fw(&curr->operState,    sizeof(curr->operState),    fp);
+        len += fw(&curr->adminState,   sizeof(curr->adminState),   fp);
+        len += fw(&curr->name_len,     sizeof(curr->name_len),     fp);
+        len += fw(curr->name,          curr->name_len,             fp);
 
         if (header_align && (len % 16)) {
             u_int8_t l = 16 - (len % 16);

@@ -4,7 +4,7 @@
 #include "if_status.h"
 
 #define header_id      "ITF"
-#define header_version 6
+#define header_version 7
 #define header_align   1
 
 #define HEADER_FLAG_ALIGN     0x01

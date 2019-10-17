@@ -23,6 +23,8 @@ static size_t        _ifNumber = 0;
 static char        **_ifAlias;
 static size_t       *_ifAlias_len;
 static ifEntry64_t  *_ifSpeed;
+static ifEntry32_t  *_ifInErrors;
+static ifEntry32_t  *_ifOutErrors;
 static ifEntry64_t  *_ifInOctets;
 static ifEntry64_t  *_ifOutOctets;
 static ifEntry8_t   *_ifAdminState;
@@ -278,7 +280,9 @@ size_t _li_descr_cc(struct variable_list *vars, size_t idx)
                  _ifInOctets[idx],
                  _ifOutOctets[idx],
                  _ifInUcastPkts[idx],
-                 _ifOutUcastPkts[idx]
+                 _ifOutUcastPkts[idx],
+                 _ifInErrors[idx],
+                 _ifOutErrors[idx]
                  );
 
         if (!info)
@@ -353,6 +357,24 @@ size_t _li_opr_state_cc(struct variable_list *vars, size_t idx)
     return ++idx;
 }
 
+size_t _li_in_errors_cc(struct variable_list *vars, size_t idx)
+{
+    CHECK_IDX;
+
+    _ifInErrors[idx] = (ifEntry32_t) *vars->val.integer;
+
+    return ++idx;
+}
+
+size_t _li_out_errors_cc(struct variable_list *vars, size_t idx)
+{
+    CHECK_IDX;
+
+    _ifOutErrors[idx] = (ifEntry32_t) *vars->val.integer;
+
+    return ++idx;
+}
+
 size_t ifNumber(void) {
     oid              theOid[] = {1,3,6,1,2,1,2,1,0};
     struct snmp_pdu *response;
@@ -376,6 +398,8 @@ struct if_status_t *load_snmp_info(void)
     IF_ALLOC(_ifAlias, char *);
     IF_ALLOC(_ifAlias_len, size_t);
     IF_ALLOC_64(_ifSpeed);
+    IF_ALLOC_32(_ifInErrors);
+    IF_ALLOC_32(_ifOutErrors);
     IF_ALLOC_64(_ifInOctets);
     IF_ALLOC_64(_ifOutOctets);
     IF_ALLOC_64(_ifInUcastPkts);
@@ -385,9 +409,11 @@ struct if_status_t *load_snmp_info(void)
 
     iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,18}, 11, 10, _li_alias_cc);
     iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,15}, 11, 50, _li_speed_cc);
+    iterate_vars((oid[]){1,3,6,1,2,1,2, 2,1,14  }, 10, 50, _li_in_errors_cc);
     iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,6 }, 11, 50, _li_in_octets_cc);
-    iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,10}, 11, 50, _li_out_octets_cc);
     iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,7 }, 11, 50, _li_in_ucast_cc);
+    iterate_vars((oid[]){1,3,6,1,2,1,2, 2,1,20  }, 10, 50, _li_out_errors_cc);
+    iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,10}, 11, 50, _li_out_octets_cc);
     iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,11}, 11, 50, _li_out_ucast_cc);
     iterate_vars((oid[]){1,3,6,1,2,1,2 ,2,1,7   }, 10, 50, _li_adm_state_cc);
     iterate_vars((oid[]){1,3,6,1,2,1,2 ,2,1,8   }, 10, 50, _li_opr_state_cc);
@@ -395,8 +421,10 @@ struct if_status_t *load_snmp_info(void)
 
     free(_ifOperState);
     free(_ifAdminState);
-    free(_ifOutOctets);
+    free(_ifInErrors);
+    free(_ifOutErrors);
     free(_ifInOctets);
+    free(_ifOutOctets);
     free(_ifInUcastPkts);
     free(_ifOutUcastPkts);
     free(_ifSpeed);

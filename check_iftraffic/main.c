@@ -95,6 +95,8 @@ int main(int argc, char *argv[])
         bytes_t outDelta = 0;
         bytes_t inPpsDelta = 0;
         bytes_t outPpsDelta = 0;
+        bytes_t inErrDelta = 0;
+        bytes_t outErrDelta = 0;
         mtime_t timeDelta = 1;
 
         if (old_info) {
@@ -105,6 +107,8 @@ int main(int argc, char *argv[])
                     outDelta = octet_delta(old->outOctets, new->outOctets) * 8;
                     inPpsDelta = octet_delta(old->inUcastPkts, new->inUcastPkts);
                     outPpsDelta = octet_delta(old->outUcastPkts, new->outUcastPkts);
+                    inErrDelta = octet_delta(old->inErrors, new->inErrors);
+                    outErrDelta = octet_delta(old->outErrors, new->outErrors);
                     timeDelta = (new->microtime - old->microtime) / 1000;
                     break;
                 }
@@ -116,24 +120,18 @@ int main(int argc, char *argv[])
         char pf_name[40];
         int pf_len;
 
-        bytes_t in_bps;
-        bytes_t out_bps;
-        bytes_t in_pps;
-        bytes_t out_pps;
-        bytes_t warn;
-        bytes_t crit;
-        bytes_t speed = options.speed ? options.speed : new->speed;
+        bytes_t speed    = options.speed ? options.speed : new->speed;
+        bytes_t in_bps   = time_delta(inDelta);
+        bytes_t out_bps  = time_delta(outDelta);
+        bytes_t in_pps   = time_delta(inPpsDelta);
+        bytes_t out_pps  = time_delta(outPpsDelta);
+        bytes_t in_err   = time_delta(inErrDelta);
+        bytes_t out_err  = time_delta(outErrDelta);
+        bytes_t warn     = options.warn * (speed / 100);
+        bytes_t crit     = options.crit * (speed / 100);
 
         double out_percent;
         double in_percent;
-
-        in_bps = timeDelta  ? inDelta / timeDelta : 0;
-        out_bps = timeDelta ? outDelta / timeDelta : 0;
-        in_pps = timeDelta ? inPpsDelta / timeDelta : 0;
-        out_pps = timeDelta ? outPpsDelta / timeDelta : 0;
-
-        warn = options.warn * (speed / 100);
-        crit = options.crit * (speed / 100);
 
         if (speed == 0) {
             out_percent = 0;
@@ -171,6 +169,14 @@ int main(int argc, char *argv[])
         pf_len = snprintf(pf_name, 40, "%s_packets_out", new->name);
         perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
                            out_pps, 0, 0, 0, 0);
+
+        pf_len = snprintf(pf_name, 40, "%s_errors_in", new->name);
+        perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
+                           in_err, 0, 0, 0, 0);
+
+        pf_len = snprintf(pf_name, 40, "%s_errors_out", new->name);
+        perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
+                           out_err, 0, 0, 0, 0);
 
         if (options.crit > 0 &&
                 (out_percent >= options.crit
