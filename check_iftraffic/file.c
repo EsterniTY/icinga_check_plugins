@@ -100,6 +100,8 @@ struct if_status_t *read_info()
         len += fr(&curr->outOctets,    sizeof(curr->outOctets),    fp);
         len += fr(&curr->inUcastPkts,  sizeof(curr->inUcastPkts),  fp);
         len += fr(&curr->outUcastPkts, sizeof(curr->outUcastPkts), fp);
+        len += fr(&curr->inMcastPkts,  sizeof(curr->inMcastPkts),  fp);
+        len += fr(&curr->outMcastPkts, sizeof(curr->outMcastPkts), fp);
         len += fr(&curr->inErrors,     sizeof(curr->inErrors),     fp);
         len += fr(&curr->outErrors,    sizeof(curr->outErrors),    fp);
         len += fr(&curr->operState,    sizeof(curr->operState),    fp);
@@ -164,6 +166,8 @@ void write_info(struct if_status_t *info)
         len += fw(&curr->outOctets,    sizeof(curr->outOctets),    fp);
         len += fw(&curr->inUcastPkts,  sizeof(curr->inUcastPkts),  fp);
         len += fw(&curr->outUcastPkts, sizeof(curr->outUcastPkts), fp);
+        len += fw(&curr->inMcastPkts,  sizeof(curr->inMcastPkts),  fp);
+        len += fw(&curr->outMcastPkts, sizeof(curr->outMcastPkts), fp);
         len += fw(&curr->inErrors,     sizeof(curr->inErrors),     fp);
         len += fw(&curr->outErrors,    sizeof(curr->outErrors),    fp);
         len += fw(&curr->operState,    sizeof(curr->operState),    fp);

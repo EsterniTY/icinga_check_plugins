@@ -95,6 +95,8 @@ int main(int argc, char *argv[])
         bytes_t outDelta = 0;
         bytes_t inPpsDelta = 0;
         bytes_t outPpsDelta = 0;
+        bytes_t inMcastDelta = 0;
+        bytes_t outMcastDelta = 0;
         bytes_t inErrDelta = 0;
         bytes_t outErrDelta = 0;
         mtime_t timeDelta = 1;
@@ -105,6 +107,8 @@ int main(int argc, char *argv[])
                 if (old->id == new->id) {
                     inDelta = octet_delta(old->inOctets, new->inOctets) * 8;
                     outDelta = octet_delta(old->outOctets, new->outOctets) * 8;
+                    inMcastDelta = octet_delta(old->inMcastPkts, new->inMcastPkts);
+                    outMcastDelta = octet_delta(old->outMcastPkts, new->outMcastPkts);
                     inPpsDelta = octet_delta(old->inUcastPkts, new->inUcastPkts);
                     outPpsDelta = octet_delta(old->outUcastPkts, new->outUcastPkts);
                     inErrDelta = octet_delta(old->inErrors, new->inErrors);
@@ -120,15 +124,17 @@ int main(int argc, char *argv[])
         char pf_name[40];
         int pf_len;
 
-        bytes_t speed    = options.speed ? options.speed : new->speed;
-        bytes_t in_bps   = time_delta(inDelta);
-        bytes_t out_bps  = time_delta(outDelta);
-        bytes_t in_pps   = time_delta(inPpsDelta);
-        bytes_t out_pps  = time_delta(outPpsDelta);
-        bytes_t in_err   = time_delta(inErrDelta);
-        bytes_t out_err  = time_delta(outErrDelta);
-        bytes_t warn     = options.warn * (speed / 100);
-        bytes_t crit     = options.crit * (speed / 100);
+        bytes_t speed     = options.speed ? options.speed : new->speed;
+        bytes_t in_bps    = time_delta(inDelta);
+        bytes_t out_bps   = time_delta(outDelta);
+        bytes_t in_mcast  = time_delta(inMcastDelta);
+        bytes_t out_mcast = time_delta(outMcastDelta);
+        bytes_t in_pps    = time_delta(inPpsDelta);
+        bytes_t out_pps   = time_delta(outPpsDelta);
+        bytes_t in_err    = time_delta(inErrDelta);
+        bytes_t out_err   = time_delta(outErrDelta);
+        bytes_t warn      = options.warn * (speed / 100);
+        bytes_t crit      = options.crit * (speed / 100);
 
         double out_percent;
         double in_percent;
@@ -164,11 +170,19 @@ int main(int argc, char *argv[])
 
         pf_len = snprintf(pf_name, 40, "%s_packets_in", new->name);
         perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
-                           in_pps, 0, 0, 0, 0);
+                           in_pps + in_mcast, 0, 0, 0, 0);
 
         pf_len = snprintf(pf_name, 40, "%s_packets_out", new->name);
         perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
-                           out_pps, 0, 0, 0, 0);
+                           out_pps + out_mcast, 0, 0, 0, 0);
+
+        pf_len = snprintf(pf_name, 40, "%s_mcast_in", new->name);
+        perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
+                           in_mcast, 0, 0, 0, 0);
+
+        pf_len = snprintf(pf_name, 40, "%s_mcast_out", new->name);
+        perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
+                           out_mcast, 0, 0, 0, 0);
 
         pf_len = snprintf(pf_name, 40, "%s_errors_in", new->name);
         perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
