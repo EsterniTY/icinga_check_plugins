@@ -3,9 +3,9 @@
 
 #include "if_status.h"
 
-#define format1 "%4s %-24s %15s %20s %20s %20s %15s %15s %14s %14s %10s %10s\n"
-#define format2 "%4lu %-24s %'15lu %'20llu %'20lu %'20lu %15d %15d %'14lu %'14lu %'10u %'10u\n"
-#define format3 "%4lu %-24s %'15lu %'20llu %'20lu %'20lu %'15lu %'15lu %'14lu %'14lu %'10lu %'10lu\n"
+#define format1 "%3s|%-24s|%5s|%17s|%18s|%18s|%10s|%10s|%14s|%14s|%6s|%7s\n"
+#define format2 "%3lu|%-24s|%'5lu|%'17llu|%'18lu|%'18lu|%10d|%10d|%'14lu|%'14lu|%'6u|%'7u\n"
+#define format3 "%3lu|%-24s|%'5lu|%'17llu|%'18lu|%'18lu|%'10lu|%'10lu|%'14lu|%'14lu|%'6lu|%'7lu\n"
 
 void spacer(const char* str);
 void print_info_table(struct if_status_t *info);
