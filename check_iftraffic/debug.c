@@ -5,7 +5,7 @@
 
 #include "debug.h"
 
-#define size 158
+#define size 188
 
 void spacer(const char* str)
 {
@@ -21,6 +21,15 @@ void spacer(const char* str)
     puts(spacer);
     free(spacer);
 }
+void print_delta_header(void)
+{
+    printf(format1, "oid", "ifName", "Speed", "deltaTime (s)",
+           "inDelta (B)", "outDelta (B)",
+           "in bps", "out bps",
+           "in pps", "out pps",
+           "in Mcast", "out Mcast",
+           "in Err", "out Err");
+}
 
 void print_delta_row(const oid id, const char *name,
                      const u_int64_t xxx,
@@ -31,22 +40,28 @@ void print_delta_row(const oid id, const char *name,
                      const u_int64_t out_bps,
                      const u_int64_t in_pps,
                      const u_int64_t out_pps,
+                     const u_int64_t in_mcast,
+                     const u_int64_t out_mcast,
                      const u_int64_t in_err,
                      const u_int64_t out_err)
 {
-    printf(format3, id, name, xxx / 1000000, timeDelta, inDelta, outDelta,
-           in_bps, out_bps, in_pps, out_pps, in_err, out_err);
+    printf(format3, id, name, xxx / 1000000, timeDelta,
+           inDelta, outDelta,
+           in_bps, out_bps,
+           in_pps, out_pps,
+           in_mcast, out_mcast,
+           in_err, out_err);
 }
 
 void print_info_table(struct if_status_t *info)
 {
     struct if_status_t *curr = NULL;
 
-    printf(format1, "oid", "ifName",
-           "Speed", "MicroTime",
+    printf(format1, "oid", "ifName", "Speed", "MicroTime",
            "inOctets", "outOctets",
            "admStatus", "oprStatus",
            "in pps", "out pps",
+           "in Mcast", "out Mcast",
            "in Err", "out Err");
 
     curr = info;
@@ -57,6 +72,7 @@ void print_info_table(struct if_status_t *info)
                curr->inOctets, curr->outOctets,
                curr->adminState, curr->operState,
                curr->inUcastPkts, curr->outUcastPkts,
+               curr->inMcastPkts, curr->outMcastPkts,
                curr->inErrors, curr->outErrors
                );
         curr = curr->next;
