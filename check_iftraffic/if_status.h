@@ -1,4 +1,4 @@
-#ifndef IF_STATUS_H
+﻿#ifndef IF_STATUS_H
 #define IF_STATUS_H
 
 #include <sys/types.h>
@@ -36,5 +36,37 @@ struct if_status_t {
     char                 *name;           // VAR
     char                 *alias;          // VAR
 };
+
+struct in_out_t {
+    ifEntry64_t in;
+    ifEntry64_t out;
+};
+
+struct in_out_float_t {
+    double in;
+    double out;
+};
+
+struct delta_t {
+#ifdef DEBUG
+    struct if_status_t    *old;
+    struct if_status_t    *new;
+    struct in_out_t       *octets;
+#endif
+    struct in_out_t       *bytes;
+    struct in_out_t       *packets;
+    struct in_out_t       *mcast;
+    struct in_out_t       *bcast;
+    struct in_out_t       *errors;
+    struct in_out_float_t *percent;
+    mtime_t                time;
+};
+
+void set_delta(struct delta_t *delta,
+               struct if_status_t *old,
+               struct if_status_t *new);
+
+struct delta_t *init_delta(void);
+void free_delta(struct delta_t *delta);
 
 #endif /* IF_STATUS_H */

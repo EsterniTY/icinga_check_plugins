@@ -28,20 +28,9 @@
 void spacer(const char* str);
 void print_info_table(struct if_status_t *info);
 void print_delta_header(void);
-void print_delta_row(const oid id, const char *name,
-                     const u_int64_t xxx,
-                     const mtime_t timeDelta,
-                     const u_int64_t inDelta,
-                     const u_int64_t outDelta,
-                     const u_int64_t in_bps,
-                     const u_int64_t out_bps,
-                     const u_int64_t in_pps,
-                     const u_int64_t out_pps,
-                     const u_int64_t in_mcast,
-                     const u_int64_t out_mcast,
-                     const u_int64_t in_bcast,
-                     const u_int64_t out_bcast,
-                     const u_int64_t in_err,
-                     const u_int64_t out_err);
+void print_delta_row(const oid id,
+                     const char *name,
+                     const u_int64_t speed,
+                     const struct delta_t *delta);
 
 #endif /* IFTRAFFIC_DEBUG_H */

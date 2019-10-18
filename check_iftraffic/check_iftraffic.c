@@ -155,6 +155,13 @@ void print_help()
     puts("\t-h    Show this help");
 }
 
+int check_percent(u_int threshold, struct delta_t *delta)
+{
+    struct in_out_float_t *p = delta->percent;
+
+    return ((threshold > 0) && (p->in >= threshold || p->out >= threshold));
+}
+
 void add_msg(const struct if_status_t *item,
              char ***stack, const size_t count,
              const double in_p, const double out_p,
@@ -306,7 +313,10 @@ size_t _li_speed_cc(struct variable_list *vars, size_t idx)
 {
     CHECK_IDX;
 
-    _ifSpeed[idx] = (u_int64_t)(*vars->val.integer * IF_SPEED_1MB);
+    if (*vars->val.integer)
+        _ifSpeed[idx] = (u_int64_t)(*vars->val.integer * IF_SPEED_1MB);
+    else
+        _ifSpeed[idx] = (u_int64_t)(options.speed);
 
     return ++idx;
 }

@@ -76,156 +76,96 @@ int main(int argc, char *argv[])
     print_delta_header();
 #endif
 
-    struct if_status_t  *new         = NULL;
-    struct if_status_t  *old         = NULL;
     struct perfdata     *pf          = NULL;
     struct perfdata     *pf_curr     = pf;
+    struct delta_t      *delta       = init_delta();
     char               **msg_w       = NULL;
     char               **msg_c       = NULL;
     size_t               msg_w_count = 0;
     size_t               msg_c_count = 0;
 
-    new = new_info;
-
-    while (new) {
-        bytes_t inDelta       = 0;
-        bytes_t outDelta      = 0;
-        bytes_t inPpsDelta    = 0;
-        bytes_t outPpsDelta   = 0;
-        bytes_t inMcastDelta  = 0;
-        bytes_t outMcastDelta = 0;
-        bytes_t inBcastDelta  = 0;
-        bytes_t outBcastDelta = 0;
-        bytes_t inErrDelta    = 0;
-        bytes_t outErrDelta   = 0;
-        mtime_t timeDelta     = 1;
-
-        if (old_info) {
-            old = old_info;
-            while (old) {
-                if (old->id == new->id) {
-                    inDelta       = octet_delta(old->inOctets,     new->inOctets    ) * 8;
-                    outDelta      = octet_delta(old->outOctets,    new->outOctets   ) * 8;
-                    inMcastDelta  = octet_delta(old->inMcastPkts,  new->inMcastPkts );
-                    outMcastDelta = octet_delta(old->outMcastPkts, new->outMcastPkts);
-                    inBcastDelta  = octet_delta(old->inBcastPkts,  new->inBcastPkts );
-                    outBcastDelta = octet_delta(old->outBcastPkts, new->outBcastPkts);
-                    inPpsDelta    = octet_delta(old->inUcastPkts,  new->inUcastPkts );
-                    outPpsDelta   = octet_delta(old->outUcastPkts, new->outUcastPkts);
-                    inErrDelta    = octet_delta(old->inErrors,     new->inErrors    );
-                    outErrDelta   = octet_delta(old->outErrors,    new->outErrors   );
-                    timeDelta     = (new->microtime - old->microtime) / 1000;
-                    break;
-                }
-
-                old = old->next;
+    for (struct if_status_t *new = new_info; new != NULL; new = new->next) {
+        for (struct if_status_t *old = old_info; old != NULL; old = old->next) {
+            if (old->id == new->id) {
+                set_delta(delta, old, new);
+                break;
             }
         }
 
         char pf_name[40];
         int pf_len;
 
-        bytes_t speed     = options.speed ? options.speed : new->speed;
-        bytes_t in_bps    = time_delta(inDelta);
-        bytes_t out_bps   = time_delta(outDelta);
-        bytes_t in_mcast  = time_delta(inMcastDelta);
-        bytes_t out_mcast = time_delta(outMcastDelta);
-        bytes_t in_bcast  = time_delta(inBcastDelta);
-        bytes_t out_bcast = time_delta(outBcastDelta);
-        bytes_t in_pps    = time_delta(inPpsDelta);
-        bytes_t out_pps   = time_delta(outPpsDelta);
-        bytes_t in_err    = time_delta(inErrDelta);
-        bytes_t out_err   = time_delta(outErrDelta);
-        bytes_t warn      = options.warn * (speed / 100);
-        bytes_t crit      = options.crit * (speed / 100);
-
-        double out_percent;
-        double in_percent;
-
-        if (speed == 0) {
-            out_percent = 0;
-            in_percent = 0;
-        } else {
-            out_percent = (double)out_bps * 100 / speed;
-            in_percent = (double)in_bps * 100 / speed;
-        }
+        bytes_t warn  = options.warn * (new->speed / 100);
+        bytes_t crit  = options.crit * (new->speed / 100);
 
         pf_len = snprintf(pf_name, 40, "%s_traffic_in", new->name);
         perfdata_add_bytes(&pf_curr, pf_name, (size_t) pf_len,
-                           in_bps, warn, crit, 0, speed);
+                           delta->bytes->in, warn, crit, 0, new->speed);
 
         if (!pf)
             pf = pf_curr;
 
         pf_len = snprintf(pf_name, 40, "%s_traffic_out", new->name);
         perfdata_add_bytes(&pf_curr, pf_name, (size_t) pf_len,
-                           out_bps, warn, crit, 0, speed);
+                           delta->bytes->out, warn, crit, 0, new->speed);
 
         pf_len = snprintf(pf_name, 40, "%s_usage_out", new->name);
         perfdata_add_percent(&pf_curr, pf_name, (size_t) pf_len,
-                             out_percent, options.warn, options.crit, 0, 100);
+                             delta->percent->out, options.warn,
+                             options.crit, 0, 100);
 
         pf_len = snprintf(pf_name, 40, "%s_usage_in", new->name);
         perfdata_add_percent(&pf_curr, pf_name, (size_t) pf_len,
-                             in_percent, options.warn, options.crit, 0, 100);
+                             delta->percent->in,
+                             options.warn, options.crit, 0, 100);
 
         pf_len = snprintf(pf_name, 40, "%s_packets_in", new->name);
         perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
-                           in_pps + in_mcast + in_bcast, 0, 0, 0, 0);
+                           delta->packets->in, 0, 0, 0, 0);
 
         pf_len = snprintf(pf_name, 40, "%s_packets_out", new->name);
         perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
-                           out_pps + out_mcast + out_bcast, 0, 0, 0, 0);
+                           delta->packets->out, 0, 0, 0, 0);
 
         pf_len = snprintf(pf_name, 40, "%s_mcast_in", new->name);
         perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
-                           in_mcast, 0, 0, 0, 0);
+                           delta->mcast->in, 0, 0, 0, 0);
 
         pf_len = snprintf(pf_name, 40, "%s_mcast_out", new->name);
         perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
-                           out_mcast, 0, 0, 0, 0);
+                           delta->mcast->out, 0, 0, 0, 0);
 
         pf_len = snprintf(pf_name, 40, "%s_bcast_in", new->name);
         perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
-                           in_bcast, 0, 0, 0, 0);
+                           delta->bcast->in, 0, 0, 0, 0);
 
         pf_len = snprintf(pf_name, 40, "%s_bcast_out", new->name);
         perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
-                           out_bcast, 0, 0, 0, 0);
+                           delta->bcast->out, 0, 0, 0, 0);
 
         pf_len = snprintf(pf_name, 40, "%s_errors_in", new->name);
         perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
-                           in_err, 0, 0, 0, 0);
+                           delta->errors->in, 0, 0, 0, 0);
 
         pf_len = snprintf(pf_name, 40, "%s_errors_out", new->name);
         perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
-                           out_err, 0, 0, 0, 0);
+                           delta->errors->out, 0, 0, 0, 0);
 
-        if (options.crit > 0 &&
-                (out_percent >= options.crit || in_percent >= options.crit)) {
+        if (check_percent(options.crit, delta)) {
             add_msg(new, &msg_c, msg_c_count++,
-                    in_percent, out_percent,
-                    in_bps, out_bps);
+                    delta->percent->in, delta->percent->out,
+                    delta->bytes->in, delta->bytes->out);
         }
-        else if (options.warn > 0 &&
-                 (out_percent >= options.warn || in_percent >= options.warn)) {
+        else if (check_percent(options.warn, delta)) {
             add_msg(new, &msg_w, msg_w_count++,
-                    in_percent, out_percent,
-                    in_bps, out_bps);
+                    delta->percent->in, delta->percent->out,
+                    delta->bytes->in, delta->bytes->out);
         }
 
 #ifdef DEBUG
-        print_delta_row(new->id, new->name, speed, timeDelta,
-                        inDelta, outDelta,
-                        in_bps, out_bps,
-                        in_pps, out_pps,
-                        in_mcast, out_mcast,
-                        in_bcast, out_bcast,
-                        in_err, out_err);
+        print_delta_row(new->id, new->name, new->speed, delta);
 #endif
-
-        new = new->next;
-    }
+    } // foreach(new)
 
     code_t exit_code = EXIT_OK;
 
@@ -281,6 +221,7 @@ int main(int argc, char *argv[])
 
     perfdata_print(pf);
     perfdata_free(pf);
+    free_delta(delta);
 
     while (msg_c_count > 0)
         free(msg_c[--msg_c_count]);
