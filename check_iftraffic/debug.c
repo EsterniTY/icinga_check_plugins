@@ -32,29 +32,23 @@ void print_delta_header(void)
            "in Err", "out Err");
 }
 
-void print_delta_row(const oid id, const char *name,
-                     const u_int64_t xxx,
-                     const mtime_t timeDelta,
-                     const u_int64_t inDelta,
-                     const u_int64_t outDelta,
-                     const u_int64_t in_bps,
-                     const u_int64_t out_bps,
-                     const u_int64_t in_pps,
-                     const u_int64_t out_pps,
-                     const u_int64_t in_mcast,
-                     const u_int64_t out_mcast,
-                     const u_int64_t in_bcast,
-                     const u_int64_t out_bcast,
-                     const u_int64_t in_err,
-                     const u_int64_t out_err)
+void print_delta_row(const oid id,
+                     const char *name,
+                     const u_int64_t speed,
+                     const struct delta_t *delta)
 {
-    printf(format3, id, name, xxx / 1000000, timeDelta,
-           inDelta, outDelta,
-           in_bps, out_bps,
-           in_pps, out_pps,
-           in_mcast, out_mcast,
-           in_bcast, out_bcast,
-           in_err, out_err);
+    printf(format3, id, name, speed / 1000000, delta->time,
+       #ifdef DEBUG
+           delta->octets->in, delta->octets->out,
+       #else
+           (u_int64_t)0, (u_int64_t)0,
+       #endif
+           delta->bytes->in, delta->bytes->out,
+           delta->packets->in, delta->packets->out,
+           delta->mcast->in, delta->mcast->out,
+           delta->bcast->in, delta->bcast->out,
+           delta->errors->in, delta->errors->out
+           );
 }
 
 void print_info_table(struct if_status_t *info)
