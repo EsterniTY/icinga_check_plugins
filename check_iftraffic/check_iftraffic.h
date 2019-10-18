@@ -56,6 +56,8 @@ struct if_status_t *load_snmp_info(void);
 size_t str_format(char **result, const char *subject,
                   const char *pattern, char *format);
 
+int check_percent(u_int threshold, struct delta_t *delta);
+
 void add_msg(const struct if_status_t *item,
              char ***stack, const size_t count,
              const double in_p, const double out_p,

@@ -155,6 +155,13 @@ void print_help()
     puts("\t-h    Show this help");
 }
 
+int check_percent(u_int threshold, struct delta_t *delta)
+{
+    struct in_out_float_t *p = delta->percent;
+
+    return ((threshold > 0) && (p->in >= threshold || p->out >= threshold));
+}
+
 void add_msg(const struct if_status_t *item,
              char ***stack, const size_t count,
              const double in_p, const double out_p,
