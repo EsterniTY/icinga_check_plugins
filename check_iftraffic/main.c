@@ -76,8 +76,6 @@ int main(int argc, char *argv[])
     print_delta_header();
 #endif
 
-    struct if_status_t  *new         = NULL;
-    struct if_status_t  *old         = NULL;
     struct perfdata     *pf          = NULL;
     struct perfdata     *pf_curr     = pf;
     struct delta_t      *delta       = init_delta();
@@ -86,38 +84,30 @@ int main(int argc, char *argv[])
     size_t               msg_w_count = 0;
     size_t               msg_c_count = 0;
 
-    new = new_info;
-
-    while (new) {
-        if (old_info) {
-            old = old_info;
-            while (old) {
-                if (old->id == new->id) {
-                    set_delta(delta, old, new);
-                    break;
-                }
-
-                old = old->next;
+    for (struct if_status_t *new = new_info; new != NULL; new = new->next) {
+        for (struct if_status_t *old = old_info; old != NULL; old = old->next) {
+            if (old->id == new->id) {
+                set_delta(delta, old, new);
+                break;
             }
         }
 
         char pf_name[40];
         int pf_len;
 
-        bytes_t speed     = options.speed ? options.speed : new->speed;
-        bytes_t warn      = options.warn * (speed / 100);
-        bytes_t crit      = options.crit * (speed / 100);
+        bytes_t warn  = options.warn * (new->speed / 100);
+        bytes_t crit  = options.crit * (new->speed / 100);
 
         pf_len = snprintf(pf_name, 40, "%s_traffic_in", new->name);
         perfdata_add_bytes(&pf_curr, pf_name, (size_t) pf_len,
-                           delta->bytes->in, warn, crit, 0, speed);
+                           delta->bytes->in, warn, crit, 0, new->speed);
 
         if (!pf)
             pf = pf_curr;
 
         pf_len = snprintf(pf_name, 40, "%s_traffic_out", new->name);
         perfdata_add_bytes(&pf_curr, pf_name, (size_t) pf_len,
-                           delta->bytes->out, warn, crit, 0, speed);
+                           delta->bytes->out, warn, crit, 0, new->speed);
 
         pf_len = snprintf(pf_name, 40, "%s_usage_out", new->name);
         perfdata_add_percent(&pf_curr, pf_name, (size_t) pf_len,
@@ -173,11 +163,9 @@ int main(int argc, char *argv[])
         }
 
 #ifdef DEBUG
-        print_delta_row(new->id, new->name, speed, delta);
+        print_delta_row(new->id, new->name, new->speed, delta);
 #endif
-
-        new = new->next;
-    }
+    } // foreach(new)
 
     code_t exit_code = EXIT_OK;
 
