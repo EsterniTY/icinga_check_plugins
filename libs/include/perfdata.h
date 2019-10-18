@@ -9,9 +9,9 @@
 #define UOM_BYTES   3
 #define UOM_COUNTER 4
 
-typedef u_int8_t uom_t;
+typedef u_int8_t  uom_t;
 typedef u_int64_t bytes_t;
-typedef double percent_t;
+typedef double    percent_t;
 
 struct perfdata {
     uom_t uom;

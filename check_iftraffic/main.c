@@ -76,46 +76,45 @@ int main(int argc, char *argv[])
     print_delta_header();
 #endif
 
-    struct if_status_t *new = NULL;
-    struct if_status_t *old = NULL;
+    struct if_status_t  *new         = NULL;
+    struct if_status_t  *old         = NULL;
+    struct perfdata     *pf          = NULL;
+    struct perfdata     *pf_curr     = pf;
+    char               **msg_w       = NULL;
+    char               **msg_c       = NULL;
+    size_t               msg_w_count = 0;
+    size_t               msg_c_count = 0;
+
     new = new_info;
 
-    struct perfdata *pf = NULL;
-    struct perfdata *pf_curr = pf;
-
-    char **msg_w = NULL;
-    char **msg_c = NULL;
-    size_t msg_w_count = 0;
-    size_t msg_c_count = 0;
-
     while (new) {
-        bytes_t inDelta = 0;
-        bytes_t outDelta = 0;
-        bytes_t inPpsDelta = 0;
-        bytes_t outPpsDelta = 0;
-        bytes_t inMcastDelta = 0;
+        bytes_t inDelta       = 0;
+        bytes_t outDelta      = 0;
+        bytes_t inPpsDelta    = 0;
+        bytes_t outPpsDelta   = 0;
+        bytes_t inMcastDelta  = 0;
         bytes_t outMcastDelta = 0;
-        bytes_t inBcastDelta = 0;
+        bytes_t inBcastDelta  = 0;
         bytes_t outBcastDelta = 0;
-        bytes_t inErrDelta = 0;
-        bytes_t outErrDelta = 0;
-        mtime_t timeDelta = 1;
+        bytes_t inErrDelta    = 0;
+        bytes_t outErrDelta   = 0;
+        mtime_t timeDelta     = 1;
 
         if (old_info) {
             old = old_info;
             while (old) {
                 if (old->id == new->id) {
-                    inDelta = octet_delta(old->inOctets, new->inOctets) * 8;
-                    outDelta = octet_delta(old->outOctets, new->outOctets) * 8;
-                    inMcastDelta = octet_delta(old->inMcastPkts, new->inMcastPkts);
+                    inDelta       = octet_delta(old->inOctets,     new->inOctets    ) * 8;
+                    outDelta      = octet_delta(old->outOctets,    new->outOctets   ) * 8;
+                    inMcastDelta  = octet_delta(old->inMcastPkts,  new->inMcastPkts );
                     outMcastDelta = octet_delta(old->outMcastPkts, new->outMcastPkts);
-                    inBcastDelta = octet_delta(old->inBcastPkts, new->inBcastPkts);
+                    inBcastDelta  = octet_delta(old->inBcastPkts,  new->inBcastPkts );
                     outBcastDelta = octet_delta(old->outBcastPkts, new->outBcastPkts);
-                    inPpsDelta = octet_delta(old->inUcastPkts, new->inUcastPkts);
-                    outPpsDelta = octet_delta(old->outUcastPkts, new->outUcastPkts);
-                    inErrDelta = octet_delta(old->inErrors, new->inErrors);
-                    outErrDelta = octet_delta(old->outErrors, new->outErrors);
-                    timeDelta = (new->microtime - old->microtime) / 1000;
+                    inPpsDelta    = octet_delta(old->inUcastPkts,  new->inUcastPkts );
+                    outPpsDelta   = octet_delta(old->outUcastPkts, new->outUcastPkts);
+                    inErrDelta    = octet_delta(old->inErrors,     new->inErrors    );
+                    outErrDelta   = octet_delta(old->outErrors,    new->outErrors   );
+                    timeDelta     = (new->microtime - old->microtime) / 1000;
                     break;
                 }
 
@@ -164,13 +163,11 @@ int main(int argc, char *argv[])
 
         pf_len = snprintf(pf_name, 40, "%s_usage_out", new->name);
         perfdata_add_percent(&pf_curr, pf_name, (size_t) pf_len,
-                             out_percent, options.warn, options.crit,
-                             0, 100);
+                             out_percent, options.warn, options.crit, 0, 100);
 
         pf_len = snprintf(pf_name, 40, "%s_usage_in", new->name);
         perfdata_add_percent(&pf_curr, pf_name, (size_t) pf_len,
-                             in_percent, options.warn, options.crit,
-                             0, 100);
+                             in_percent, options.warn, options.crit, 0, 100);
 
         pf_len = snprintf(pf_name, 40, "%s_packets_in", new->name);
         perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
@@ -205,14 +202,13 @@ int main(int argc, char *argv[])
                            out_err, 0, 0, 0, 0);
 
         if (options.crit > 0 &&
-                (out_percent >= options.crit
-                 || in_percent >= options.crit)) {
+                (out_percent >= options.crit || in_percent >= options.crit)) {
             add_msg(new, &msg_c, msg_c_count++,
                     in_percent, out_percent,
                     in_bps, out_bps);
-        } else if (options.warn > 0 &&
-                   (out_percent >= options.warn
-                    || in_percent >= options.warn)) {
+        }
+        else if (options.warn > 0 &&
+                 (out_percent >= options.warn || in_percent >= options.warn)) {
             add_msg(new, &msg_w, msg_w_count++,
                     in_percent, out_percent,
                     in_bps, out_bps);
