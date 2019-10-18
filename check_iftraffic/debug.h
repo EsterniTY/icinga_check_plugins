@@ -8,16 +8,19 @@
     "%10s|%10s|" \
     "%14s|%14s|" \
     "%14s|%14s|" \
+    "%14s|%14s|" \
     "%6s|%7s\n"
 #define format2 "%3lu|%-24s|%'5lu|%'17llu|" \
     "%'18lu|%'18lu|" \
     "%10d|%10d|" \
     "%'14lu|%'14lu|" \
     "%'14lu|%'14lu|" \
+    "%'14lu|%'14lu|" \
     "%'6u|%'7u\n"
 #define format3 "%3lu|%-24s|%'5lu|%'17llu|" \
     "%'18lu|%'18lu|" \
     "%'10lu|%'10lu|" \
+    "%'14lu|%'14lu|" \
     "%'14lu|%'14lu|" \
     "%'14lu|%'14lu|" \
     "%'6lu|%'7lu\n"
@@ -36,6 +39,8 @@ void print_delta_row(const oid id, const char *name,
                      const u_int64_t out_pps,
                      const u_int64_t in_mcast,
                      const u_int64_t out_mcast,
+                     const u_int64_t in_bcast,
+                     const u_int64_t out_bcast,
                      const u_int64_t in_err,
                      const u_int64_t out_err);
 

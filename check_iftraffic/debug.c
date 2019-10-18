@@ -5,7 +5,7 @@
 
 #include "debug.h"
 
-#define size 188
+#define size 218
 
 void spacer(const char* str)
 {
@@ -28,6 +28,7 @@ void print_delta_header(void)
            "in bps", "out bps",
            "in pps", "out pps",
            "in Mcast", "out Mcast",
+           "in Bcast", "out Bcast",
            "in Err", "out Err");
 }
 
@@ -42,6 +43,8 @@ void print_delta_row(const oid id, const char *name,
                      const u_int64_t out_pps,
                      const u_int64_t in_mcast,
                      const u_int64_t out_mcast,
+                     const u_int64_t in_bcast,
+                     const u_int64_t out_bcast,
                      const u_int64_t in_err,
                      const u_int64_t out_err)
 {
@@ -50,6 +53,7 @@ void print_delta_row(const oid id, const char *name,
            in_bps, out_bps,
            in_pps, out_pps,
            in_mcast, out_mcast,
+           in_bcast, out_bcast,
            in_err, out_err);
 }
 
@@ -62,6 +66,7 @@ void print_info_table(struct if_status_t *info)
            "admStatus", "oprStatus",
            "in pps", "out pps",
            "in Mcast", "out Mcast",
+           "in Bcast", "out Bcast",
            "in Err", "out Err");
 
     curr = info;
@@ -73,6 +78,7 @@ void print_info_table(struct if_status_t *info)
                curr->adminState, curr->operState,
                curr->inUcastPkts, curr->outUcastPkts,
                curr->inMcastPkts, curr->outMcastPkts,
+               curr->inBcastPkts, curr->outBcastPkts,
                curr->inErrors, curr->outErrors
                );
         curr = curr->next;
