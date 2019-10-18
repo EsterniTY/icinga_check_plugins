@@ -313,7 +313,10 @@ size_t _li_speed_cc(struct variable_list *vars, size_t idx)
 {
     CHECK_IDX;
 
-    _ifSpeed[idx] = (u_int64_t)(*vars->val.integer * IF_SPEED_1MB);
+    if (*vars->val.integer)
+        _ifSpeed[idx] = (u_int64_t)(*vars->val.integer * IF_SPEED_1MB);
+    else
+        _ifSpeed[idx] = (u_int64_t)(options.speed);
 
     return ++idx;
 }
