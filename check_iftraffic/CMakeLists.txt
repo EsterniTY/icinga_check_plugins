@@ -9,6 +9,7 @@ add_executable(${PROJECT_NAME}
     info.c
     file.c
     debug.c
+    if_status.c
 )
 
 target_link_libraries(${PROJECT_NAME} sub::libs)
