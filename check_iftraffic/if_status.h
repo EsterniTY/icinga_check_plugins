@@ -15,23 +15,22 @@ typedef u_int32_t ifEntry32_t;
 typedef u_int64_t ifEntry64_t;
 
 struct if_status_t {
-    mtime_t microtime;   // 8
-    oid id;              // 8
-    ifEntry64_t speed;     // 8
-    ifEntry64_t inOctets;  // 8
-    ifEntry64_t outOctets; // 8
-    ifEntry64_t inUcastPkts;  // 8
-    ifEntry64_t outUcastPkts; // 8
-    ifEntry32_t inErrors;     // 4
-    ifEntry32_t outErrors;    // 4
-    ifEntry8_t adminState; // 1
-    ifEntry8_t operState;  // 1
-    size_t name_len;     // 8
-    char *name;          // VAR
-    size_t alias_len;    // 8
-    char *alias;         // VAR
-
-    struct if_status_t *next;
+    struct if_status_t   *next;           // 8
+    mtime_t               microtime;      // 8
+    oid                   id;             // 8
+    size_t                name_len;       // 8
+    size_t                alias_len;      // 8
+    ifEntry64_t           speed;          // 8
+    ifEntry64_t           inOctets;       // 8
+    ifEntry64_t           outOctets;      // 8
+    ifEntry64_t           inUcastPkts;    // 8
+    ifEntry64_t           outUcastPkts;   // 8
+    ifEntry32_t           inErrors;       // 4
+    ifEntry32_t           outErrors;      // 4
+    ifEntry8_t            adminState;     // 1
+    ifEntry8_t            operState;      // 1
+    char                 *name;           // VAR
+    char                 *alias;          // VAR
 };
 
 #endif /* IF_STATUS_H */
