@@ -95,6 +95,8 @@ int main(int argc, char *argv[])
         bytes_t outPpsDelta = 0;
         bytes_t inMcastDelta = 0;
         bytes_t outMcastDelta = 0;
+        bytes_t inBcastDelta = 0;
+        bytes_t outBcastDelta = 0;
         bytes_t inErrDelta = 0;
         bytes_t outErrDelta = 0;
         mtime_t timeDelta = 1;
@@ -107,6 +109,8 @@ int main(int argc, char *argv[])
                     outDelta = octet_delta(old->outOctets, new->outOctets) * 8;
                     inMcastDelta = octet_delta(old->inMcastPkts, new->inMcastPkts);
                     outMcastDelta = octet_delta(old->outMcastPkts, new->outMcastPkts);
+                    inBcastDelta = octet_delta(old->inBcastPkts, new->inBcastPkts);
+                    outBcastDelta = octet_delta(old->outBcastPkts, new->outBcastPkts);
                     inPpsDelta = octet_delta(old->inUcastPkts, new->inUcastPkts);
                     outPpsDelta = octet_delta(old->outUcastPkts, new->outUcastPkts);
                     inErrDelta = octet_delta(old->inErrors, new->inErrors);
@@ -127,6 +131,8 @@ int main(int argc, char *argv[])
         bytes_t out_bps   = time_delta(outDelta);
         bytes_t in_mcast  = time_delta(inMcastDelta);
         bytes_t out_mcast = time_delta(outMcastDelta);
+        bytes_t in_bcast  = time_delta(inBcastDelta);
+        bytes_t out_bcast = time_delta(outBcastDelta);
         bytes_t in_pps    = time_delta(inPpsDelta);
         bytes_t out_pps   = time_delta(outPpsDelta);
         bytes_t in_err    = time_delta(inErrDelta);
@@ -168,11 +174,11 @@ int main(int argc, char *argv[])
 
         pf_len = snprintf(pf_name, 40, "%s_packets_in", new->name);
         perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
-                           in_pps + in_mcast, 0, 0, 0, 0);
+                           in_pps + in_mcast + in_bcast, 0, 0, 0, 0);
 
         pf_len = snprintf(pf_name, 40, "%s_packets_out", new->name);
         perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
-                           out_pps + out_mcast, 0, 0, 0, 0);
+                           out_pps + out_mcast + out_bcast, 0, 0, 0, 0);
 
         pf_len = snprintf(pf_name, 40, "%s_mcast_in", new->name);
         perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
@@ -181,6 +187,14 @@ int main(int argc, char *argv[])
         pf_len = snprintf(pf_name, 40, "%s_mcast_out", new->name);
         perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
                            out_mcast, 0, 0, 0, 0);
+
+        pf_len = snprintf(pf_name, 40, "%s_bcast_in", new->name);
+        perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
+                           in_bcast, 0, 0, 0, 0);
+
+        pf_len = snprintf(pf_name, 40, "%s_bcast_out", new->name);
+        perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
+                           out_bcast, 0, 0, 0, 0);
 
         pf_len = snprintf(pf_name, 40, "%s_errors_in", new->name);
         perfdata_add_normal(&pf_curr, pf_name, (size_t) pf_len,
@@ -210,6 +224,7 @@ int main(int argc, char *argv[])
                         in_bps, out_bps,
                         in_pps, out_pps,
                         in_mcast, out_mcast,
+                        in_bcast, out_bcast,
                         in_err, out_err);
 #endif
 

@@ -27,6 +27,8 @@ struct if_status_t {
     ifEntry64_t           outUcastPkts;   // 8
     ifEntry64_t           inMcastPkts;    // 8
     ifEntry64_t           outMcastPkts;   // 8
+    ifEntry64_t           inBcastPkts;    // 8
+    ifEntry64_t           outBcastPkts;   // 8
     ifEntry32_t           inErrors;       // 4
     ifEntry32_t           outErrors;      // 4
     ifEntry8_t            adminState;     // 1
