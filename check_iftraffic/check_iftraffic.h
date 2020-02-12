@@ -14,6 +14,9 @@
 #define IF_USAGE_ALIAS "Interface %s (alias %s) usage in: %.2f%%%s (%'lu bps), out: %.2f%%%s (%'lu bps)"
 #define MESSAGE_BUFER_SIZE 160
 
+#define VENDOR_OTHER    0
+#define VENDOR_MIKROTIK 1
+
 #define CHECK_IDX if (idx >= _ifNumber) return idx
 
 #define IF_ALLOC(name, size) \
@@ -65,4 +68,5 @@ void add_msg(const struct if_status_t *item,
              );
 
 u_int get_host_uptime();
+u_int8_t get_vendor();
 #endif /* CHECK_IFTRAFFIC_H */

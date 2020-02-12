@@ -601,3 +601,29 @@ u_int get_host_uptime()
 
     return value;
 }
+
+u_int8_t get_vendor()
+{
+    oid              voidMikrotik[] = {1,3,6,1,4,1,14988,1,0};
+
+    oid              theOid[]       = {1,3,6,1,2,1,1,2,0};
+    struct snmp_pdu *response;
+    u_char           vendor         = VENDOR_OTHER;
+    oid             *ooid;
+    size_t           size;
+
+    get_pdu(theOid, OID_LENGTH(theOid), &response);
+    check_response_errstat(response);
+
+    if (response->variables->type == ASN_OBJECT_ID) {
+        size = response->variables->val_len;
+        ooid = response->variables->val.objid;
+
+        if (memcmp(ooid, voidMikrotik, size) == 0)
+            vendor = VENDOR_MIKROTIK;
+    }
+
+    snmp_free_pdu(response);
+
+    return vendor;
+}
