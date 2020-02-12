@@ -3,21 +3,21 @@
 
 #include "if_status.h"
 
-#define format1 "%3s|%-24s|%5s|%17s|" \
+#define format1 "%4s|%-24s|%5s|%17s|" \
     "%18s|%18s|" \
     "%10s|%10s|" \
     "%14s|%14s|" \
     "%14s|%14s|" \
     "%14s|%14s|" \
     "%6s|%7s\n"
-#define format2 "%3lu|%-24s|%'5lu|%'17llu|" \
+#define format2 "%4lu|%-24s|%'5lu|%'17llu|" \
     "%'18lu|%'18lu|" \
     "%10d|%10d|" \
     "%'14lu|%'14lu|" \
     "%'14lu|%'14lu|" \
     "%'14lu|%'14lu|" \
     "%'6u|%'7u\n"
-#define format3 "%3lu|%-24s|%'5lu|%'17llu|" \
+#define format3 "%4lu|%-24s|%'5lu|%'17llu|" \
     "%'18lu|%'18lu|" \
     "%'10lu|%'10lu|" \
     "%'14lu|%'14lu|" \
