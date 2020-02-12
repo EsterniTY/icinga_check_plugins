@@ -470,13 +470,31 @@ struct if_status_t *load_snmp_info(void)
     iterate_vars((oid[]){1,3,6,1,2,1,2, 2,1,14  }, 10, 50, _li_in_errors_cc);
     iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,6 }, 11, 50, _li_in_octets_cc);
     iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,7 }, 11, 50, _li_in_ucast_cc);
-    iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,8 }, 11, 50, _li_in_mcast_cc);
-    iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,9 }, 11, 50, _li_in_bcast_cc);
     iterate_vars((oid[]){1,3,6,1,2,1,2, 2,1,20  }, 10, 50, _li_out_errors_cc);
     iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,10}, 11, 50, _li_out_octets_cc);
     iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,11}, 11, 50, _li_out_ucast_cc);
-    iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,12}, 11, 50, _li_out_mcast_cc);
-    iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,13}, 11, 50, _li_out_bcast_cc);
+
+    if (host_settings.vendor == VENDOR_MIKROTIK) {
+        iterate_vars((oid[]){1,3,6,1,4,1,14988,1,1,14,1,1,42}, 13, 50,
+                     _li_in_bcast_cc);
+        iterate_vars((oid[]){1,3,6,1,4,1,14988,1,1,14,1,1,44}, 13, 50,
+                     _li_in_mcast_cc);
+        iterate_vars((oid[]){1,3,6,1,4,1,14988,1,1,14,1,1,72}, 13, 50,
+                     _li_out_bcast_cc);
+        iterate_vars((oid[]){1,3,6,1,4,1,14988,1,1,14,1,1,74}, 13, 50,
+                     _li_out_mcast_cc);
+    }
+    else {
+        iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,8 }, 11, 50,
+                     _li_in_mcast_cc);
+        iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,9 }, 11, 50,
+                     _li_in_bcast_cc);
+        iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,12}, 11, 50,
+                     _li_out_mcast_cc);
+        iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,13}, 11, 50,
+                     _li_out_bcast_cc);
+    }
+
     iterate_vars((oid[]){1,3,6,1,2,1,2 ,2,1,7   }, 10, 50, _li_adm_state_cc);
     iterate_vars((oid[]){1,3,6,1,2,1,2 ,2,1,8   }, 10, 50, _li_opr_state_cc);
     iterate_vars((oid[]){1,3,6,1,2,1,31,1,1,1,1 }, 11, 10, _li_descr_cc);
@@ -600,4 +618,30 @@ u_int get_host_uptime()
     snmp_free_pdu(response);
 
     return value;
+}
+
+u_int8_t get_vendor()
+{
+    oid              voidMikrotik[] = {1,3,6,1,4,1,14988,1,0};
+
+    oid              theOid[]       = {1,3,6,1,2,1,1,2,0};
+    struct snmp_pdu *response;
+    u_char           vendor         = VENDOR_OTHER;
+    oid             *ooid;
+    size_t           size;
+
+    get_pdu(theOid, OID_LENGTH(theOid), &response);
+    check_response_errstat(response);
+
+    if (response->variables->type == ASN_OBJECT_ID) {
+        size = response->variables->val_len;
+        ooid = response->variables->val.objid;
+
+        if (memcmp(ooid, voidMikrotik, size) == 0)
+            vendor = VENDOR_MIKROTIK;
+    }
+
+    snmp_free_pdu(response);
+
+    return vendor;
 }

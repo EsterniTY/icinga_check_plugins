@@ -28,6 +28,7 @@ void write_header(FILE *fp, u_int16_t records)
     header->version = header_version;
     header->records = records;
     header->uptime = host_settings.uptime;
+    header->vendor = host_settings.vendor;
 
     header->flags = 0;
     if (header_align)
@@ -63,13 +64,9 @@ struct if_status_t *read_info()
     fread(&header, sizeof(header), 1, fp);
 
     if (strcmp(header_id, header.id) != 0 ||
-            header.version != header_version) {
-        fclose(fp);
-        remove(options.cache_path);
-        return NULL;
-    }
-
-    if (header.uptime > host_settings.uptime) {
+            header.version != header_version ||
+            header.vendor != host_settings.vendor ||
+            header.uptime > host_settings.uptime) {
         fclose(fp);
         remove(options.cache_path);
         return NULL;

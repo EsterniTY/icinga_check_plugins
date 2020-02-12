@@ -33,10 +33,17 @@ void print_delta_header(void)
 }
 
 void print_delta_row(const oid id,
-                     const char *name,
+                     const char *_name,
                      const u_int64_t speed,
                      const struct delta_t *delta)
 {
+    char               *name = calloc(25, sizeof(char));
+    size_t              len  = 0;
+
+    len = strlen(_name) < 25 ? strlen(_name) : 24;
+    memset(name, 0, sizeof(char) * 25);
+    memcpy(name, _name, sizeof(char) * len);
+
     printf(format3, id, name, speed / 1000000, delta->time,
        #ifdef DEBUG
            delta->octets->in, delta->octets->out,
@@ -49,11 +56,17 @@ void print_delta_row(const oid id,
            delta->bcast->in, delta->bcast->out,
            delta->errors->in, delta->errors->out
            );
+
+    free(name);
 }
 
 void print_info_table(struct if_status_t *info)
 {
     struct if_status_t *curr = NULL;
+    char               *name = NULL;
+    size_t              len  = 0;
+
+    name = calloc(25, sizeof(char));
 
     printf(format1, "oid", "ifName", "Speed", "MicroTime",
            "inOctets", "outOctets",
@@ -65,7 +78,11 @@ void print_info_table(struct if_status_t *info)
 
     curr = info;
     while(curr != NULL) {
-        printf(format2, curr->id, curr->name,
+        len = curr->name_len < 25 ? curr->name_len : 24;
+        memset(name, 0, sizeof(char) * 25);
+        memcpy(name, curr->name, sizeof(char) * len);
+
+        printf(format2, curr->id, name,
                curr->speed / 1000000,
                curr->microtime,
                curr->inOctets, curr->outOctets,
@@ -77,4 +94,6 @@ void print_info_table(struct if_status_t *info)
                );
         curr = curr->next;
     }
+
+    free(name);
 }

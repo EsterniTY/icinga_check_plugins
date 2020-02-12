@@ -38,9 +38,11 @@ int main(int argc, char *argv[])
                                   options.version);
 
     host_settings.uptime = get_host_uptime();
+    host_settings.vendor = get_vendor();
 
 #ifdef DEBUG
     printf("Uptime: >%u<\n", host_settings.uptime);
+    printf("Vendor: >%u<\n", host_settings.vendor);
 #endif
 
     new_info = load_snmp_info();
