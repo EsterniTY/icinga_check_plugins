@@ -48,6 +48,7 @@ extern struct opt_s {
 extern struct host_settings_s {
     u_int8_t has_ifSpeed64;
     u_int    uptime;
+    u_int8_t vendor;
 } host_settings;
 
 extern struct if_status_t if_status[];
