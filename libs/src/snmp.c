@@ -49,8 +49,10 @@ void init_session(char *host, char *community, long version)
     snmp_sess_init(&session);
     session.peername = host;
     session.version = version;
-    session.community = (u_char *) community;
     session.community_len = strlen(community);
+
+    session.community = calloc(1, session.community_len + 1);
+    strcpy((char *) session.community, community);
 
     ss = snmp_open(&session);
 
