@@ -2,7 +2,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pcre.h>
+
+#ifndef __FreeBSD__
 #include <callback.h>
+#endif
+
 #include <openssl/md5.h>
 
 #include <net-snmp/net-snmp-config.h>
