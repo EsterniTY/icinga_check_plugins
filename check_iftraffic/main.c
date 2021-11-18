@@ -48,6 +48,12 @@ int main(int argc, char *argv[])
     new_info = load_snmp_info();
     close_session();
 
+    if (new_info == NULL) {
+        free(options.cache_path);
+
+        exit_error(EXIT_OK, "No data received");
+    }
+
     old_info = read_info();
 
     if (old_info == NULL) {
