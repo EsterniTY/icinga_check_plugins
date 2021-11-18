@@ -562,18 +562,19 @@ size_t str_format(char **result, const char *subject,
     char pat_vector[OVECCOUNT / 2][4];
     char *tmp;
 
-    for (i = 0; i < rc; i++) {
-        if (ovector[2*i] < 0)
-            continue;
+    memset(pat_vector, 0, OVECCOUNT / 2 * 4);
 
+    for (i = 0; i < rc; i++) {
         pat_sizes[i] = 1 + (i < 10 ? 1 : 2);
         snprintf(pat_vector[i], pat_sizes[i] + 1, "$%d", i);
 
         if ((tmp = strstr(format, pat_vector[i])) == NULL)
             continue;
 
-        substr_len += (size_t)(ovector[2*i+1] - ovector[2*i]);
-        pat_len += pat_sizes[i];
+        if (ovector[2*i] >= 0) {
+            substr_len += (size_t)(ovector[2*i+1] - ovector[2*i]);
+            pat_len += pat_sizes[i];
+        }
     }
 
     char *_result = calloc(4096, sizeof(char));
@@ -584,20 +585,25 @@ size_t str_format(char **result, const char *subject,
     size_t start = 0;
     size_t end = format_len;
     for (i = 0; i < rc; i++) {
-        if (ovector[2*i] < 0)
-            continue;
-
         if (!(tmp = strstr(_result, pat_vector[i])))
             continue;
 
-        start = (size_t)(tmp - _result) + pat_sizes[i];
-        insert_size = (size_t)(ovector[2*i+1] - ovector[2*i]);
+        if (ovector[2*i] < 0) {
+            start = (size_t)(tmp - _result);
 
-        for (size_t k = end; k >= start; --k)
-            _result[k + insert_size - pat_sizes[i]] = _result[k];
+            for (size_t k = start; k < end; k++) {
+                _result[k] = _result[k + pat_sizes[i]];
+            }
+        } else {
+            start = (size_t)(tmp - _result) + pat_sizes[i];
+            insert_size = (size_t)(ovector[2*i+1] - ovector[2*i]);
 
-        memcpy(tmp, &subject[ovector[2*i]], insert_size);
-        end += insert_size - pat_sizes[i];
+            for (size_t k = end; k >= start; --k)
+                _result[k + insert_size - pat_sizes[i]] = _result[k];
+
+            memcpy(tmp, &subject[ovector[2*i]], insert_size);
+            end += insert_size - pat_sizes[i];
+        }
     }
 
     *result = calloc(new_size + 1, sizeof(char));
